@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <DUT Name="E_TrafficMode" Id="{0f564e47-53bf-48b7-b613-b60c454de482}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_TrafficMode :
+(
+	eOffPeak    := 0,   // Normal balanced traffic (default)
+    eUpPeak     := 1,   // Morning rush — everyone going up from lobby
+    eDownPeak   := 2,   // Evening rush — everyone going down
+    eLunchPeak  := 3,   // Mid-day — chaotic two-way traffic
+    eNightMode  := 4    // 10 PM - 6 AM — only one elevator runs
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

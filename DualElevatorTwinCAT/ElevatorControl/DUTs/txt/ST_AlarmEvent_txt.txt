@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <DUT Name="ST_AlarmEvent" Id="{a8567584-7f20-48a3-add4-6381b2e1985c}">
+    <Declaration><![CDATA[TYPE ST_AlarmEvent :
+STRUCT
+    iEventID        : DINT;             // Unique number (1, 2, 3...)
+    tTimestamp      : DT;               // Date and time it happened
+    eSeverity       : E_AlarmSeverity;  // How bad (Info to Emergency)
+    iElevatorID     : INT;              // 0 = system-wide, 1 = E1, 2 = E2
+    sMessage        : STRING(120);      // Human-readable text
+    sSource         : STRING(40);       // Which function block triggered it
+    bAcknowledged   : BOOL;             // Did someone click "Acknowledge"?
+    tAckTime        : DT;               // When they acknowledged
+    sAckBy          : STRING(20);       // Who acknowledged it (operator name)
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

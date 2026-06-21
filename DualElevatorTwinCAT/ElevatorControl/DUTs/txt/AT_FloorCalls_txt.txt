@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <DUT Name="AT_FloorCalls" Id="{7f28c886-950f-436d-934a-9cb82d07f512}">
+    <Declaration><![CDATA[TYPE AT_FloorCalls : ARRAY[0..50] OF ST_FloorCall;
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

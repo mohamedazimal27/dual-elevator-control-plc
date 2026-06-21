@@ -1,0 +1,383 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="FB_Safety" Id="{d0ed8165-a17b-4f4b-a1ba-400a11e6f559}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Safety
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+VAR CONSTANT
+    cMAX_ALARMS : INT := 99;
+END_VAR
+
+// ============================================================================
+// INPUTS — Raw sensor signals
+// ============================================================================
+VAR_INPUT
+    // Elevator references (to command them)
+    refE1               : REFERENCE TO FB_Elevator;
+    refE2               : REFERENCE TO FB_Elevator;
+    
+    // Door sensors (TRUE = obstruction detected)
+    bE1DoorSensor       : BOOL := FALSE;
+    bE2DoorSensor       : BOOL := FALSE;
+    
+    // Weight sensors (TRUE = overload)
+    bE1WeightSensor     : BOOL := FALSE;
+    bE2WeightSensor     : BOOL := FALSE;
+    
+    // Emergency stop buttons (TRUE = pressed)
+    bE1EmergencyBtn     : BOOL := FALSE;
+    bE2EmergencyBtn     : BOOL := FALSE;
+    
+    // Building safety
+    bFireAlarm          : BOOL := FALSE;
+    bFirefighterKey     : BOOL := FALSE;
+    bPowerFault         : BOOL := FALSE;
+    
+    // Overspeed detectors
+    bOverspeedE1        : BOOL := FALSE;
+    bOverspeedE2        : BOOL := FALSE;
+    
+    // Door mechanism faults
+    bDoorOpenFaultE1    : BOOL := FALSE;
+    bDoorOpenFaultE2    : BOOL := FALSE;
+END_VAR
+
+// ============================================================================
+// OUTPUTS — Safety decisions
+// ============================================================================
+VAR_OUTPUT
+    bE1Enable           : BOOL := TRUE;
+    bE2Enable           : BOOL := TRUE;
+    bSystemAlarm        : BOOL := FALSE;
+    sAlarmMessage       : STRING(120) := '';
+    eAlarmSeverity      : E_AlarmSeverity := E_AlarmSeverity.eInfo;
+    
+    // Individual alarm flags
+    bE1DoorObstruction  : BOOL := FALSE;
+    bE2DoorObstruction  : BOOL := FALSE;
+    bE1Overload         : BOOL := FALSE;
+    bE2Overload         : BOOL := FALSE;
+    bE1EmergencyActive  : BOOL := FALSE;
+    bE2EmergencyActive  : BOOL := FALSE;
+    bFireModeActive     : BOOL := FALSE;
+END_VAR
+
+// ============================================================================
+// INTERNAL VARIABLES
+// ============================================================================
+VAR
+    // Debounce timers
+    _tonDoorObsE1       : TON;
+    _tonDoorObsE2       : TON;
+    _tonOverloadE1      : TON;
+    _tonOverloadE2      : TON;
+    _tonEmergencyE1     : TON;
+    _tonEmergencyE2     : TON;
+    _tonFireAlarm       : TON;
+    _tonPowerFault      : TON;
+    
+    // Alarm history
+    _astAlarmLog        : AT_AlarmLog;
+    _iAlarmIndex        : INT := 0;
+    _iNextEventID       : DINT := 1;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// ======================================================================
+// DOOR OBSTRUCTION DETECTION
+// ======================================================================
+_tonDoorObsE1(IN := bE1DoorSensor, PT := T#200MS);
+IF _tonDoorObsE1.Q THEN
+    bE1DoorObstruction := TRUE;
+    refE1.bDoorObstruction := TRUE;
+    bSystemAlarm := TRUE;
+    sAlarmMessage := 'E1 Door Obstruction Detected';
+    eAlarmSeverity := E_AlarmSeverity.eWarning;
+    AddAlarm(E_AlarmSeverity.eWarning, 1, 'E1 Door Obstruction', 'FB_Safety');
+ELSE
+    bE1DoorObstruction := FALSE;
+    refE1.bDoorObstruction := FALSE;
+END_IF;
+
+_tonDoorObsE2(IN := bE2DoorSensor, PT := T#200MS);
+IF _tonDoorObsE2.Q THEN
+    bE2DoorObstruction := TRUE;
+    refE2.bDoorObstruction := TRUE;
+    bSystemAlarm := TRUE;
+    sAlarmMessage := 'E2 Door Obstruction Detected';
+    eAlarmSeverity := E_AlarmSeverity.eWarning;
+    AddAlarm(E_AlarmSeverity.eWarning, 2, 'E2 Door Obstruction', 'FB_Safety');
+ELSE
+    bE2DoorObstruction := FALSE;
+    refE2.bDoorObstruction := FALSE;
+END_IF;
+
+// ======================================================================
+// OVERLOAD DETECTION
+// ======================================================================
+_tonOverloadE1(IN := bE1WeightSensor, PT := T#500MS);
+IF _tonOverloadE1.Q THEN
+    bE1Overload := TRUE;
+    refE1.bOverload := TRUE;
+    bE1Enable := FALSE;
+    bSystemAlarm := TRUE;
+    sAlarmMessage := 'E1 Overload - Service Suspended';
+    eAlarmSeverity := E_AlarmSeverity.eCritical;
+    AddAlarm(E_AlarmSeverity.eCritical, 1, 'E1 Overload Detected', 'FB_Safety');
+ELSE
+    bE1Overload := FALSE;
+    refE1.bOverload := FALSE;
+    bE1Enable := TRUE;
+END_IF;
+
+_tonOverloadE2(IN := bE2WeightSensor, PT := T#500MS);
+IF _tonOverloadE2.Q THEN
+    bE2Overload := TRUE;
+    refE2.bOverload := TRUE;
+    bE2Enable := FALSE;
+    bSystemAlarm := TRUE;
+    sAlarmMessage := 'E2 Overload - Service Suspended';
+    eAlarmSeverity := E_AlarmSeverity.eCritical;
+    AddAlarm(E_AlarmSeverity.eCritical, 2, 'E2 Overload Detected', 'FB_Safety');
+ELSE
+    bE2Overload := FALSE;
+    refE2.bOverload := FALSE;
+    bE2Enable := TRUE;
+END_IF;
+
+// ======================================================================
+// EMERGENCY STOP
+// ======================================================================
+_tonEmergencyE1(IN := bE1EmergencyBtn, PT := T#100MS);
+IF _tonEmergencyE1.Q THEN
+    bE1EmergencyActive := TRUE;
+    refE1.bEmergencyStop := TRUE;
+    bSystemAlarm := TRUE;
+    sAlarmMessage := 'E1 EMERGENCY STOP ACTIVATED';
+    eAlarmSeverity := E_AlarmSeverity.eEmergency;
+    AddAlarm(E_AlarmSeverity.eEmergency, 1, 'E1 Emergency Stop Button', 'FB_Safety');
+END_IF;
+
+_tonEmergencyE2(IN := bE2EmergencyBtn, PT := T#100MS);
+IF _tonEmergencyE2.Q THEN
+    bE2EmergencyActive := TRUE;
+    refE2.bEmergencyStop := TRUE;
+    bSystemAlarm := TRUE;
+    sAlarmMessage := 'E2 EMERGENCY STOP ACTIVATED';
+    eAlarmSeverity := E_AlarmSeverity.eEmergency;
+    AddAlarm(E_AlarmSeverity.eEmergency, 2, 'E2 Emergency Stop Button', 'FB_Safety');
+END_IF;
+
+// Reset emergency when button released
+IF NOT bE1EmergencyBtn AND bE1EmergencyActive THEN
+    bE1EmergencyActive := FALSE;
+    refE1.bEmergencyStop := FALSE;
+    refE1.ResetEmergency();
+END_IF;
+
+IF NOT bE2EmergencyBtn AND bE2EmergencyActive THEN
+    bE2EmergencyActive := FALSE;
+    refE2.bEmergencyStop := FALSE;
+    refE2.ResetEmergency();
+END_IF;
+
+// ======================================================================
+// FIRE MODE
+// ======================================================================
+_tonFireAlarm(IN := bFireAlarm, PT := T#1S);
+IF _tonFireAlarm.Q THEN
+    bFireModeActive := TRUE;
+    refE1.bFireMode := TRUE;
+    refE2.bFireMode := TRUE;
+    bSystemAlarm := TRUE;
+    sAlarmMessage := 'FIRE MODE - ELEVATORS RETURNING TO GROUND';
+    eAlarmSeverity := E_AlarmSeverity.eEmergency;
+    AddAlarm(E_AlarmSeverity.eEmergency, 0, 'Building Fire Alarm Activated', 'FB_Safety');
+END_IF;
+
+// Firefighter override
+IF bFirefighterKey THEN
+    refE1.bFireMode := FALSE;
+    refE2.bFireMode := FALSE;
+    bFireModeActive := FALSE;
+    sAlarmMessage := 'Firefighter Override Active';
+    AddAlarm(E_AlarmSeverity.eWarning, 0, 'Firefighter Key Switch', 'FB_Safety');
+END_IF;
+
+// Reset fire mode when alarm clears
+IF NOT bFireAlarm AND NOT bFirefighterKey AND bFireModeActive THEN
+    bFireModeActive := FALSE;
+    refE1.bFireMode := FALSE;
+    refE2.bFireMode := FALSE;
+    refE1.ResetFireMode();
+    refE2.ResetFireMode();
+END_IF;
+
+// ======================================================================
+// POWER FAULT
+// ======================================================================
+_tonPowerFault(IN := bPowerFault, PT := T#500MS);
+IF _tonPowerFault.Q THEN
+    bSystemAlarm := TRUE;
+    sAlarmMessage := 'POWER FAULT DETECTED - BATTERY BACKUP ACTIVE';
+    eAlarmSeverity := E_AlarmSeverity.eEmergency;
+    AddAlarm(E_AlarmSeverity.eEmergency, 0, 'Power Supply Fault', 'FB_Safety');
+END_IF;
+
+// ======================================================================
+// OVERSPEED PROTECTION
+// ======================================================================
+IF bOverspeedE1 THEN
+    refE1.EmergencyStop();
+    bSystemAlarm := TRUE;
+    sAlarmMessage := 'E1 OVERSPEED - EMERGENCY BRAKE ACTIVATED';
+    eAlarmSeverity := E_AlarmSeverity.eEmergency;
+    AddAlarm(E_AlarmSeverity.eEmergency, 1, 'E1 Overspeed Detection', 'FB_Safety');
+END_IF;
+
+IF bOverspeedE2 THEN
+    refE2.EmergencyStop();
+    bSystemAlarm := TRUE;
+    sAlarmMessage := 'E2 OVERSPEED - EMERGENCY BRAKE ACTIVATED';
+    eAlarmSeverity := E_AlarmSeverity.eEmergency;
+    AddAlarm(E_AlarmSeverity.eEmergency, 2, 'E2 Overspeed Detection', 'FB_Safety');
+END_IF;
+
+// ======================================================================
+// DOOR FAULT DETECTION
+// ======================================================================
+IF bDoorOpenFaultE1 THEN
+    bE1Enable := FALSE;
+    bSystemAlarm := TRUE;
+    sAlarmMessage := 'E1 Door Mechanism Fault';
+    eAlarmSeverity := E_AlarmSeverity.eCritical;
+    AddAlarm(E_AlarmSeverity.eCritical, 1, 'E1 Door Open/Close Fault', 'FB_Safety');
+END_IF;
+
+IF bDoorOpenFaultE2 THEN
+    bE2Enable := FALSE;
+    bSystemAlarm := TRUE;
+    sAlarmMessage := 'E2 Door Mechanism Fault';
+    eAlarmSeverity := E_AlarmSeverity.eCritical;
+    AddAlarm(E_AlarmSeverity.eCritical, 2, 'E2 Door Open/Close Fault', 'FB_Safety');
+END_IF;]]></ST>
+    </Implementation>
+    <Method Name="AcknowledgeAlarm" Id="{82a22a1a-5579-4345-aa52-039d6bfd3843}">
+      <Declaration><![CDATA[METHOD PUBLIC AcknowledgeAlarm : BOOL
+VAR_INPUT
+    iEventID    : DINT;
+    sOperator   : STRING(20);
+END_VAR
+VAR
+    i : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i := 0 TO cMAX_ALARMS DO
+    IF _astAlarmLog[i].iEventID = iEventID THEN
+        _astAlarmLog[i].bAcknowledged := TRUE;
+        _astAlarmLog[i].tAckTime := GetCurrentDateTime();
+        _astAlarmLog[i].sAckBy := sOperator;
+        AcknowledgeAlarm := TRUE;
+        RETURN;
+    END_IF;
+END_FOR;
+
+AcknowledgeAlarm := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AddAlarm" Id="{cba1162a-2c69-41b9-be9e-88a36e77386c}">
+      <Declaration><![CDATA[METHOD PRIVATE AddAlarm : BOOL
+VAR_INPUT
+    eSeverity   : E_AlarmSeverity;
+    iElevatorID : INT;
+    sMessage    : STRING(120);
+    sSource     : STRING(40);
+END_VAR
+	
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_astAlarmLog[_iAlarmIndex].iEventID := _iNextEventID;
+_iNextEventID := _iNextEventID + 1;
+
+// Use current TIME for timestamp (simpler, no DT needed)
+_astAlarmLog[_iAlarmIndex].tTimestamp := GetCurrentDateTime();
+_astAlarmLog[_iAlarmIndex].eSeverity := eSeverity;
+_astAlarmLog[_iAlarmIndex].iElevatorID := iElevatorID;
+_astAlarmLog[_iAlarmIndex].sMessage := sMessage;
+_astAlarmLog[_iAlarmIndex].sSource := sSource;
+_astAlarmLog[_iAlarmIndex].bAcknowledged := FALSE;
+
+_iAlarmIndex := (_iAlarmIndex + 1) MOD (cMAX_ALARMS + 1);
+
+AddAlarm := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetAlarmLog" Id="{11638f04-d3f2-47cf-9162-d7f76835f88b}">
+      <Declaration><![CDATA[METHOD PUBLIC GetAlarmLog : AT_AlarmLog
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[GetAlarmLog := _astAlarmLog;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetCurrentDateTime" Id="{4955e5fb-32f3-4821-aedc-102f5f295c85}">
+      <Declaration><![CDATA[METHOD PRIVATE GetCurrentDateTime : DT
+VAR
+    ft : T_FILETIME;
+    uliTime : ULINT;
+END_VAR	]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[uliTime := F_GetSystemTime();
+
+ft.dwLowDateTime := TO_DWORD(uliTime AND 16#FFFFFFFF);
+ft.dwHighDateTime := TO_DWORD(SHR(uliTime, 32));
+
+GetCurrentDateTime := FILETIME_TO_DT(ft);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ResetSystemAlarm" Id="{e39712b3-b722-48eb-921a-3524c7632d4a}">
+      <Declaration><![CDATA[METHOD PUBLIC ResetSystemAlarm : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bE1DoorObstruction AND NOT bE2DoorObstruction AND
+   NOT bE1Overload AND NOT bE2Overload AND
+   NOT bE1EmergencyActive AND NOT bE2EmergencyActive AND
+   NOT bFireModeActive AND NOT bPowerFault THEN
+    bSystemAlarm := FALSE;
+    sAlarmMessage := '';
+    eAlarmSeverity := E_AlarmSeverity.eInfo;
+    ResetSystemAlarm := TRUE;
+ELSE
+    ResetSystemAlarm := FALSE;
+END_IF;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Safety">
+      <LineId Id="91" Count="176" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Safety.AcknowledgeAlarm">
+      <LineId Id="14" Count="9" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Safety.AddAlarm">
+      <LineId Id="34" Count="12" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Safety.GetAlarmLog">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Safety.GetCurrentDateTime">
+      <LineId Id="20" Count="4" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Safety.ResetSystemAlarm">
+      <LineId Id="8" Count="9" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

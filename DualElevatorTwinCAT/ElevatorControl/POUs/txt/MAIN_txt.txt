@@ -1,0 +1,395 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="MAIN" Id="{987de102-5191-41ef-ade4-e1633fa2a35b}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+
+// ============================================================================
+// ELEVATOR INSTANCES
+// ============================================================================
+VAR
+    E1              : FB_Elevator;
+    E2              : FB_Elevator;
+END_VAR
+
+// ============================================================================
+// GROUP CONTROL
+// ============================================================================
+VAR
+    Dispatcher      : FB_Dispatcher;
+END_VAR
+
+// ============================================================================
+// SAFETY SYSTEM
+// ============================================================================
+VAR
+    Safety          : FB_Safety;
+END_VAR
+
+// ============================================================================
+// SIMULATION INPUTS (Delete these when connecting real hardware)
+// ============================================================================
+VAR
+    // Hall call simulation
+    bSimHall_G_Up       : BOOL := FALSE;
+    bSimHall_1_Up       : BOOL := FALSE;
+    bSimHall_1_Down     : BOOL := FALSE;
+    bSimHall_2_Up       : BOOL := FALSE;
+    bSimHall_2_Down     : BOOL := FALSE;
+    bSimHall_3_Up       : BOOL := FALSE;
+    bSimHall_3_Down     : BOOL := FALSE;
+    bSimHall_4_Up       : BOOL := FALSE;
+    bSimHall_4_Down     : BOOL := FALSE;
+    bSimHall_5_Up       : BOOL := FALSE;
+    bSimHall_5_Down     : BOOL := FALSE;
+    bSimHall_6_Up       : BOOL := FALSE;
+    bSimHall_6_Down     : BOOL := FALSE;
+    bSimHall_7_Up       : BOOL := FALSE;
+    bSimHall_7_Down     : BOOL := FALSE;
+    bSimHall_8_Up       : BOOL := FALSE;
+    bSimHall_8_Down     : BOOL := FALSE;
+    bSimHall_9_Up       : BOOL := FALSE;
+    bSimHall_9_Down     : BOOL := FALSE;
+    bSimHall_10_Down    : BOOL := FALSE;
+    
+    // Car call simulation — E1
+    bSimE1_Car_G        : BOOL := FALSE;
+    bSimE1_Car_1        : BOOL := FALSE;
+    bSimE1_Car_2        : BOOL := FALSE;
+    bSimE1_Car_3        : BOOL := FALSE;
+    bSimE1_Car_4        : BOOL := FALSE;
+    bSimE1_Car_5        : BOOL := FALSE;
+    bSimE1_Car_6        : BOOL := FALSE;
+    bSimE1_Car_7        : BOOL := FALSE;
+    bSimE1_Car_8        : BOOL := FALSE;
+    bSimE1_Car_9        : BOOL := FALSE;
+    bSimE1_Car_10       : BOOL := FALSE;
+    
+    // Car call simulation — E2
+    bSimE2_Car_G        : BOOL := FALSE;
+    bSimE2_Car_1        : BOOL := FALSE;
+    bSimE2_Car_2        : BOOL := FALSE;
+    bSimE2_Car_3        : BOOL := FALSE;
+    bSimE2_Car_4        : BOOL := FALSE;
+    bSimE2_Car_5        : BOOL := FALSE;
+    bSimE2_Car_6        : BOOL := FALSE;
+    bSimE2_Car_7        : BOOL := FALSE;
+    bSimE2_Car_8        : BOOL := FALSE;
+    bSimE2_Car_9        : BOOL := FALSE;
+    bSimE2_Car_10       : BOOL := FALSE;
+    
+    // Safety simulation
+    bSimE1_DoorSensor   : BOOL := FALSE;
+    bSimE1_WeightSensor : BOOL := FALSE;
+    bSimE1_EmergencyBtn : BOOL := FALSE;
+    bSimE2_DoorSensor   : BOOL := FALSE;
+    bSimE2_WeightSensor : BOOL := FALSE;
+    bSimE2_EmergencyBtn : BOOL := FALSE;
+    bSimFireAlarm       : BOOL := FALSE;
+    bSimPowerFault      : BOOL := FALSE;
+    
+    // HMI command simulation
+    bSimHMI_EmergencyStop   : BOOL := FALSE;
+    bSimHMI_ResetEmergency  : BOOL := FALSE;
+    bSimHMI_FireMode        : BOOL := FALSE;
+    bSimHMI_ResetFireMode   : BOOL := FALSE;
+    bSimHMI_ClearAllCalls   : BOOL := FALSE;
+END_VAR
+
+// ============================================================================
+// INTERNAL STATE TRACKING
+// ============================================================================
+VAR
+    _bInitialized       : BOOL := FALSE;
+    _bPrevClearCalls    : BOOL := FALSE;
+	 bSystemEnable 		: BOOL := TRUE;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// ======================================================================
+// ONE-TIME INITIALIZATION
+// ======================================================================
+IF NOT _bInitialized THEN
+    
+    // Connect dispatcher references to elevator instances
+    Dispatcher.refE1 REF= E1;
+    Dispatcher.refE2 REF= E2;
+    
+    // Connect safety references to elevator instances
+    Safety.refE1 REF= E1;
+    Safety.refE2 REF= E2;
+    
+    _bInitialized := TRUE;
+    
+END_IF;
+
+// ======================================================================
+// SIMULATION: COPY SIM INPUTS TO PHYSICAL I/O ADDRESSES
+// ======================================================================
+// DELETE THIS ENTIRE SECTION WHEN CONNECTING REAL HARDWARE
+// ----------------------------------------------------------------------
+
+// Hall calls
+GVL_IO.diHall_G_Up         := bSimHall_G_Up;
+GVL_IO.diHall_1_Up         := bSimHall_1_Up;
+GVL_IO.diHall_1_Down       := bSimHall_1_Down;
+GVL_IO.diHall_2_Up         := bSimHall_2_Up;
+GVL_IO.diHall_2_Down       := bSimHall_2_Down;
+GVL_IO.diHall_3_Up         := bSimHall_3_Up;
+GVL_IO.diHall_3_Down       := bSimHall_3_Down;
+GVL_IO.diHall_4_Up         := bSimHall_4_Up;
+GVL_IO.diHall_4_Down       := bSimHall_4_Down;
+GVL_IO.diHall_5_Up         := bSimHall_5_Up;
+GVL_IO.diHall_5_Down       := bSimHall_5_Down;
+GVL_IO.diHall_6_Up         := bSimHall_6_Up;
+GVL_IO.diHall_6_Down       := bSimHall_6_Down;
+GVL_IO.diHall_7_Up         := bSimHall_7_Up;
+GVL_IO.diHall_7_Down       := bSimHall_7_Down;
+GVL_IO.diHall_8_Up         := bSimHall_8_Up;
+GVL_IO.diHall_8_Down       := bSimHall_8_Down;
+GVL_IO.diHall_9_Up         := bSimHall_9_Up;
+GVL_IO.diHall_9_Down       := bSimHall_9_Down;
+GVL_IO.diHall_10_Down      := bSimHall_10_Down;
+
+// Car calls E1
+GVL_IO.diE1_Car_G          := bSimE1_Car_G;
+GVL_IO.diE1_Car_1          := bSimE1_Car_1;
+GVL_IO.diE1_Car_2          := bSimE1_Car_2;
+GVL_IO.diE1_Car_3          := bSimE1_Car_3;
+GVL_IO.diE1_Car_4          := bSimE1_Car_4;
+GVL_IO.diE1_Car_5          := bSimE1_Car_5;
+GVL_IO.diE1_Car_6          := bSimE1_Car_6;
+GVL_IO.diE1_Car_7          := bSimE1_Car_7;
+GVL_IO.diE1_Car_8          := bSimE1_Car_8;
+GVL_IO.diE1_Car_9          := bSimE1_Car_9;
+GVL_IO.diE1_Car_10         := bSimE1_Car_10;
+
+// Car calls E2
+GVL_IO.diE2_Car_G          := bSimE2_Car_G;
+GVL_IO.diE2_Car_1          := bSimE2_Car_1;
+GVL_IO.diE2_Car_2          := bSimE2_Car_2;
+GVL_IO.diE2_Car_3          := bSimE2_Car_3;
+GVL_IO.diE2_Car_4          := bSimE2_Car_4;
+GVL_IO.diE2_Car_5          := bSimE2_Car_5;
+GVL_IO.diE2_Car_6          := bSimE2_Car_6;
+GVL_IO.diE2_Car_7          := bSimE2_Car_7;
+GVL_IO.diE2_Car_8          := bSimE2_Car_8;
+GVL_IO.diE2_Car_9          := bSimE2_Car_9;
+GVL_IO.diE2_Car_10         := bSimE2_Car_10;
+
+// Safety sensors
+GVL_IO.diE1_DoorSensor     := bSimE1_DoorSensor;
+GVL_IO.diE1_WeightSensor   := bSimE1_WeightSensor;
+GVL_IO.diE1_EmergencyBtn   := bSimE1_EmergencyBtn;
+GVL_IO.diE2_DoorSensor     := bSimE2_DoorSensor;
+GVL_IO.diE2_WeightSensor   := bSimE2_WeightSensor;
+GVL_IO.diE2_EmergencyBtn   := bSimE2_EmergencyBtn;
+GVL_IO.diFireAlarm         := bSimFireAlarm;
+GVL_IO.diPowerFault        := bSimPowerFault;
+
+// HMI commands
+GVL_HMI.g_bHMI_EmergencyStop    := bSimHMI_EmergencyStop;
+GVL_HMI.g_bHMI_ResetEmergency   := bSimHMI_ResetEmergency;
+GVL_HMI.g_bHMI_FireMode         := bSimHMI_FireMode;
+GVL_HMI.g_bHMI_ResetFireMode    := bSimHMI_ResetFireMode;
+GVL_HMI.g_bHMI_ClearAllCalls    := bSimHMI_ClearAllCalls;
+
+// ======================================================================
+// MAP PHYSICAL I/O TO ELEVATOR INPUTS
+// ======================================================================
+
+// Elevator 1 inputs
+E1.bEnable          := bSystemEnable AND Safety.bE1Enable;
+E1.bEmergencyStop   := GVL_IO.diE1_EmergencyBtn OR GVL_HMI.g_bHMI_EmergencyStop;
+E1.bFireMode        := GVL_IO.diFireAlarm OR GVL_HMI.g_bHMI_FireMode;
+E1.bDoorObstruction := GVL_IO.diE1_DoorSensor;
+E1.bOverload        := GVL_IO.diE1_WeightSensor;
+
+// Elevator 2 inputs
+E2.bEnable          := bSystemEnable AND Safety.bE2Enable;
+E2.bEmergencyStop   := GVL_IO.diE2_EmergencyBtn OR GVL_HMI.g_bHMI_EmergencyStop;
+E2.bFireMode        := GVL_IO.diFireAlarm OR GVL_HMI.g_bHMI_FireMode;
+E2.bDoorObstruction := GVL_IO.diE2_DoorSensor;
+E2.bOverload        := GVL_IO.diE2_WeightSensor;
+
+// ======================================================================
+// MAP PHYSICAL I/O TO SAFETY INPUTS
+// ======================================================================
+Safety.bE1DoorSensor    := GVL_IO.diE1_DoorSensor;
+Safety.bE2DoorSensor    := GVL_IO.diE2_DoorSensor;
+Safety.bE1WeightSensor  := GVL_IO.diE1_WeightSensor;
+Safety.bE2WeightSensor  := GVL_IO.diE2_WeightSensor;
+Safety.bE1EmergencyBtn  := GVL_IO.diE1_EmergencyBtn;
+Safety.bE2EmergencyBtn  := GVL_IO.diE2_EmergencyBtn;
+Safety.bFireAlarm       := GVL_IO.diFireAlarm;
+Safety.bPowerFault      := GVL_IO.diPowerFault;
+
+// ======================================================================
+// PROCESS HALL CALLS → DISPATCHER
+// ======================================================================
+IF GVL_IO.diHall_G_Up      THEN Dispatcher.AddCall(0, E_Direction.eUp, FALSE, 0); END_IF;
+IF GVL_IO.diHall_1_Up      THEN Dispatcher.AddCall(1, E_Direction.eUp, FALSE, 0); END_IF;
+IF GVL_IO.diHall_1_Down    THEN Dispatcher.AddCall(1, E_Direction.eDown, FALSE, 0); END_IF;
+IF GVL_IO.diHall_2_Up      THEN Dispatcher.AddCall(2, E_Direction.eUp, FALSE, 0); END_IF;
+IF GVL_IO.diHall_2_Down    THEN Dispatcher.AddCall(2, E_Direction.eDown, FALSE, 0); END_IF;
+IF GVL_IO.diHall_3_Up      THEN Dispatcher.AddCall(3, E_Direction.eUp, FALSE, 0); END_IF;
+IF GVL_IO.diHall_3_Down    THEN Dispatcher.AddCall(3, E_Direction.eDown, FALSE, 0); END_IF;
+IF GVL_IO.diHall_4_Up      THEN Dispatcher.AddCall(4, E_Direction.eUp, FALSE, 0); END_IF;
+IF GVL_IO.diHall_4_Down    THEN Dispatcher.AddCall(4, E_Direction.eDown, FALSE, 0); END_IF;
+IF GVL_IO.diHall_5_Up      THEN Dispatcher.AddCall(5, E_Direction.eUp, FALSE, 0); END_IF;
+IF GVL_IO.diHall_5_Down    THEN Dispatcher.AddCall(5, E_Direction.eDown, FALSE, 0); END_IF;
+IF GVL_IO.diHall_6_Up      THEN Dispatcher.AddCall(6, E_Direction.eUp, FALSE, 0); END_IF;
+IF GVL_IO.diHall_6_Down    THEN Dispatcher.AddCall(6, E_Direction.eDown, FALSE, 0); END_IF;
+IF GVL_IO.diHall_7_Up      THEN Dispatcher.AddCall(7, E_Direction.eUp, FALSE, 0); END_IF;
+IF GVL_IO.diHall_7_Down    THEN Dispatcher.AddCall(7, E_Direction.eDown, FALSE, 0); END_IF;
+IF GVL_IO.diHall_8_Up      THEN Dispatcher.AddCall(8, E_Direction.eUp, FALSE, 0); END_IF;
+IF GVL_IO.diHall_8_Down    THEN Dispatcher.AddCall(8, E_Direction.eDown, FALSE, 0); END_IF;
+IF GVL_IO.diHall_9_Up      THEN Dispatcher.AddCall(9, E_Direction.eUp, FALSE, 0); END_IF;
+IF GVL_IO.diHall_9_Down    THEN Dispatcher.AddCall(9, E_Direction.eDown, FALSE, 0); END_IF;
+IF GVL_IO.diHall_10_Down   THEN Dispatcher.AddCall(10, E_Direction.eDown, FALSE, 0); END_IF;
+
+// ======================================================================
+// PROCESS CAR CALLS → DIRECT TO ELEVATOR
+// ======================================================================
+IF GVL_IO.diE1_Car_G   THEN E1.CallFloor(0); END_IF;
+IF GVL_IO.diE1_Car_1   THEN E1.CallFloor(1); END_IF;
+IF GVL_IO.diE1_Car_2   THEN E1.CallFloor(2); END_IF;
+IF GVL_IO.diE1_Car_3   THEN E1.CallFloor(3); END_IF;
+IF GVL_IO.diE1_Car_4   THEN E1.CallFloor(4); END_IF;
+IF GVL_IO.diE1_Car_5   THEN E1.CallFloor(5); END_IF;
+IF GVL_IO.diE1_Car_6   THEN E1.CallFloor(6); END_IF;
+IF GVL_IO.diE1_Car_7   THEN E1.CallFloor(7); END_IF;
+IF GVL_IO.diE1_Car_8   THEN E1.CallFloor(8); END_IF;
+IF GVL_IO.diE1_Car_9   THEN E1.CallFloor(9); END_IF;
+IF GVL_IO.diE1_Car_10  THEN E1.CallFloor(10); END_IF;
+
+IF GVL_IO.diE2_Car_G   THEN E2.CallFloor(0); END_IF;
+IF GVL_IO.diE2_Car_1   THEN E2.CallFloor(1); END_IF;
+IF GVL_IO.diE2_Car_2   THEN E2.CallFloor(2); END_IF;
+IF GVL_IO.diE2_Car_3   THEN E2.CallFloor(3); END_IF;
+IF GVL_IO.diE2_Car_4   THEN E2.CallFloor(4); END_IF;
+IF GVL_IO.diE2_Car_5   THEN E2.CallFloor(5); END_IF;
+IF GVL_IO.diE2_Car_6   THEN E2.CallFloor(6); END_IF;
+IF GVL_IO.diE2_Car_7   THEN E2.CallFloor(7); END_IF;
+IF GVL_IO.diE2_Car_8   THEN E2.CallFloor(8); END_IF;
+IF GVL_IO.diE2_Car_9   THEN E2.CallFloor(9); END_IF;
+IF GVL_IO.diE2_Car_10  THEN E2.CallFloor(10); END_IF;
+
+// ======================================================================
+// HMI CAR CALLS
+// ======================================================================
+IF GVL_HMI.g_bHMI_E1_Car_G THEN E1.CallFloor(0); GVL_HMI.g_bHMI_E1_Car_G := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E1_Car_1 THEN E1.CallFloor(1); GVL_HMI.g_bHMI_E1_Car_1 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E1_Car_2 THEN E1.CallFloor(2); GVL_HMI.g_bHMI_E1_Car_2 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E1_Car_3 THEN E1.CallFloor(3); GVL_HMI.g_bHMI_E1_Car_3 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E1_Car_4 THEN E1.CallFloor(4); GVL_HMI.g_bHMI_E1_Car_4 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E1_Car_5 THEN E1.CallFloor(5); GVL_HMI.g_bHMI_E1_Car_5 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E1_Car_6 THEN E1.CallFloor(6); GVL_HMI.g_bHMI_E1_Car_6 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E1_Car_7 THEN E1.CallFloor(7); GVL_HMI.g_bHMI_E1_Car_7 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E1_Car_8 THEN E1.CallFloor(8); GVL_HMI.g_bHMI_E1_Car_8 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E1_Car_9 THEN E1.CallFloor(9); GVL_HMI.g_bHMI_E1_Car_9 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E1_Car_10 THEN E1.CallFloor(10); GVL_HMI.g_bHMI_E1_Car_10 := FALSE; END_IF;
+
+IF GVL_HMI.g_bHMI_E2_Car_G THEN E2.CallFloor(0); GVL_HMI.g_bHMI_E2_Car_G := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E2_Car_1 THEN E2.CallFloor(1); GVL_HMI.g_bHMI_E2_Car_1 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E2_Car_2 THEN E2.CallFloor(2); GVL_HMI.g_bHMI_E2_Car_2 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E2_Car_3 THEN E2.CallFloor(3); GVL_HMI.g_bHMI_E2_Car_3 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E2_Car_4 THEN E2.CallFloor(4); GVL_HMI.g_bHMI_E2_Car_4 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E2_Car_5 THEN E2.CallFloor(5); GVL_HMI.g_bHMI_E2_Car_5 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E2_Car_6 THEN E2.CallFloor(6); GVL_HMI.g_bHMI_E2_Car_6 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E2_Car_7 THEN E2.CallFloor(7); GVL_HMI.g_bHMI_E2_Car_7 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E2_Car_8 THEN E2.CallFloor(8); GVL_HMI.g_bHMI_E2_Car_8 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E2_Car_9 THEN E2.CallFloor(9); GVL_HMI.g_bHMI_E2_Car_9 := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_E2_Car_10 THEN E2.CallFloor(10); GVL_HMI.g_bHMI_E2_Car_10 := FALSE; END_IF;
+
+// ======================================================================
+// HMI HALL CALLS
+// ======================================================================
+IF GVL_HMI.g_bHMI_Call_G_Up THEN Dispatcher.AddCall(0, E_Direction.eUp, FALSE, 0); GVL_HMI.g_bHMI_Call_G_Up := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_1_Up THEN Dispatcher.AddCall(1, E_Direction.eUp, FALSE, 0); GVL_HMI.g_bHMI_Call_1_Up := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_1_Down THEN Dispatcher.AddCall(1, E_Direction.eDown, FALSE, 0); GVL_HMI.g_bHMI_Call_1_Down := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_2_Up THEN Dispatcher.AddCall(2, E_Direction.eUp, FALSE, 0); GVL_HMI.g_bHMI_Call_2_Up := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_2_Down THEN Dispatcher.AddCall(2, E_Direction.eDown, FALSE, 0); GVL_HMI.g_bHMI_Call_2_Down := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_3_Up THEN Dispatcher.AddCall(3, E_Direction.eUp, FALSE, 0); GVL_HMI.g_bHMI_Call_3_Up := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_3_Down THEN Dispatcher.AddCall(3, E_Direction.eDown, FALSE, 0); GVL_HMI.g_bHMI_Call_3_Down := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_4_Up THEN Dispatcher.AddCall(4, E_Direction.eUp, FALSE, 0); GVL_HMI.g_bHMI_Call_4_Up := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_4_Down THEN Dispatcher.AddCall(4, E_Direction.eDown, FALSE, 0); GVL_HMI.g_bHMI_Call_4_Down := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_5_Up THEN Dispatcher.AddCall(5, E_Direction.eUp, FALSE, 0); GVL_HMI.g_bHMI_Call_5_Up := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_5_Down THEN Dispatcher.AddCall(5, E_Direction.eDown, FALSE, 0); GVL_HMI.g_bHMI_Call_5_Down := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_6_Up THEN Dispatcher.AddCall(6, E_Direction.eUp, FALSE, 0); GVL_HMI.g_bHMI_Call_6_Up := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_6_Down THEN Dispatcher.AddCall(6, E_Direction.eDown, FALSE, 0); GVL_HMI.g_bHMI_Call_6_Down := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_7_Up THEN Dispatcher.AddCall(7, E_Direction.eUp, FALSE, 0); GVL_HMI.g_bHMI_Call_7_Up := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_7_Down THEN Dispatcher.AddCall(7, E_Direction.eDown, FALSE, 0); GVL_HMI.g_bHMI_Call_7_Down := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_8_Up THEN Dispatcher.AddCall(8, E_Direction.eUp, FALSE, 0); GVL_HMI.g_bHMI_Call_8_Up := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_8_Down THEN Dispatcher.AddCall(8, E_Direction.eDown, FALSE, 0); GVL_HMI.g_bHMI_Call_8_Down := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_9_Up THEN Dispatcher.AddCall(9, E_Direction.eUp, FALSE, 0); GVL_HMI.g_bHMI_Call_9_Up := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_9_Down THEN Dispatcher.AddCall(9, E_Direction.eDown, FALSE, 0); GVL_HMI.g_bHMI_Call_9_Down := FALSE; END_IF;
+IF GVL_HMI.g_bHMI_Call_10_Down THEN Dispatcher.AddCall(10, E_Direction.eDown, FALSE, 0); GVL_HMI.g_bHMI_Call_10_Down := FALSE; END_IF;
+
+// ======================================================================
+// CLEAR ALL CALLS
+// ======================================================================
+IF GVL_HMI.g_bHMI_ClearAllCalls AND NOT _bPrevClearCalls THEN
+    Dispatcher.ClearAllCalls();
+    E1.ClearCall(0); E1.ClearCall(1); E1.ClearCall(2); E1.ClearCall(3);
+    E1.ClearCall(4); E1.ClearCall(5); E1.ClearCall(6); E1.ClearCall(7);
+    E1.ClearCall(8); E1.ClearCall(9); E1.ClearCall(10);
+    E2.ClearCall(0); E2.ClearCall(1); E2.ClearCall(2); E2.ClearCall(3);
+    E2.ClearCall(4); E2.ClearCall(5); E2.ClearCall(6); E2.ClearCall(7);
+    E2.ClearCall(8); E2.ClearCall(9); E2.ClearCall(10);
+END_IF;
+
+_bPrevClearCalls := GVL_HMI.g_bHMI_ClearAllCalls;
+
+// ======================================================================
+// CYCLIC EXECUTION — CALL ALL FBs EVERY SCAN
+// ======================================================================
+
+// Run elevators
+E1();
+E2();
+
+// Run dispatcher
+Dispatcher.ProcessQueue();
+Dispatcher.eTrafficMode := GVL_HMI.g_eHMI_TrafficMode;
+
+// Run safety
+Safety();
+
+// ======================================================================
+// UPDATE HMI OUTPUT DATA
+// ======================================================================
+GVL_HMI.g_stE1Status := E1.GetStatus();
+GVL_HMI.g_stE2Status := E2.GetStatus();
+GVL_HMI.g_stMetrics := Dispatcher.stMetrics;
+GVL_HMI.g_astAlarmLog := Safety.GetAlarmLog();
+GVL_HMI.g_bSystemReady := E1.bIsReady OR E2.bIsReady;
+GVL_HMI.g_bAlarmActive := Safety.bSystemAlarm;
+
+IF Safety.bSystemAlarm THEN
+    GVL_HMI.g_sAlarmMessage := Safety.sAlarmMessage;
+ELSE
+    GVL_HMI.g_sAlarmMessage := '';
+END_IF;
+
+// System status text
+IF E1.eState = E_ElevatorState.eEmergencyStop OR 
+   E2.eState = E_ElevatorState.eEmergencyStop THEN
+    GVL_HMI.g_sSystemStatus := 'EMERGENCY STOP';
+ELSIF E1.eState = E_ElevatorState.eFireMode OR 	
+      E2.eState = E_ElevatorState.eFireMode THEN
+    GVL_HMI.g_sSystemStatus := 'FIRE MODE ACTIVE';
+ELSIF NOT bSystemEnable THEN
+    GVL_HMI.g_sSystemStatus := 'SYSTEM DISABLED';
+ELSE
+    GVL_HMI.g_sSystemStatus := 'NORMAL OPERATION';
+END_IF;]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="106" Count="168" />
+      <LineId Id="483" Count="65" />
+      <LineId Id="340" Count="17" />
+      <LineId Id="552" Count="4" />
+      <LineId Id="363" Count="18" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

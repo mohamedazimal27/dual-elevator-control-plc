@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <DUT Name="AT_AlarmLog" Id="{a5ed2189-83db-47e3-b75e-eaf375457a41}">
+    <Declaration><![CDATA[TYPE AT_AlarmLog : ARRAY[0..99] OF ST_AlarmEvent;
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

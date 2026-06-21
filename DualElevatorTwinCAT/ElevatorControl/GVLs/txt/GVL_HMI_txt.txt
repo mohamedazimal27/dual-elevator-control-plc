@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <GVL Name="GVL_HMI" Id="{98f7f643-d3f6-4b5e-99b9-b5a8b71d943f}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+// ============================================
+// GVL_HMI — Variables Exposed to HMI
+// ============================================
+
+VAR_GLOBAL
+    // Elevator status — what the HMI displays
+    g_stE1Status        : ST_ElevatorStatus;    // Everything about E1
+    g_stE2Status        : ST_ElevatorStatus;    // Everything about E2
+    
+    // System metrics
+    g_stMetrics         : ST_PerformanceMetrics;
+    
+    // Alarm history
+    g_astAlarmLog       : AT_AlarmLog;
+    g_iAlarmCount       : INT := 0;
+    
+    // Call queue display
+    g_astCallQueue      : AT_FloorCalls;
+    g_iQueueCount       : INT := 0;
+    
+    // System status text
+    g_bSystemReady      : BOOL := FALSE;
+    g_sSystemStatus     : STRING(40) := 'Initializing';
+    g_bAlarmActive      : BOOL := FALSE;
+    g_sAlarmMessage     : STRING(120) := '';
+    
+    // ------------------------------------------------------------------------
+    // HMI TO PLC — Commands from operator
+    // ------------------------------------------------------------------------
+    g_bHMI_EmergencyStop    : BOOL := FALSE;    // Pressed = stop everything
+    g_bHMI_ResetEmergency   : BOOL := FALSE;    // Pressed = clear emergency
+    g_bHMI_FireMode         : BOOL := FALSE;    // Pressed = activate fire mode
+    g_bHMI_ResetFireMode    : BOOL := FALSE;    // Pressed = clear fire mode
+    g_eHMI_TrafficMode      : E_TrafficMode := E_TrafficMode.eOffPeak;
+    g_bHMI_ClearAllCalls    : BOOL := FALSE;    // Pressed = empty all queues
+    
+    // ------------------------------------------------------------------------
+    // HMI TO PLC — Floor calls from HMI buttons
+    // ------------------------------------------------------------------------
+    // Hall calls
+    g_bHMI_Call_G_Up        : BOOL := FALSE;
+    g_bHMI_Call_1_Up        : BOOL := FALSE;
+    g_bHMI_Call_1_Down      : BOOL := FALSE;
+    g_bHMI_Call_2_Up        : BOOL := FALSE;
+    g_bHMI_Call_2_Down      : BOOL := FALSE;
+    g_bHMI_Call_3_Up        : BOOL := FALSE;
+    g_bHMI_Call_3_Down      : BOOL := FALSE;
+    g_bHMI_Call_4_Up        : BOOL := FALSE;
+    g_bHMI_Call_4_Down      : BOOL := FALSE;
+    g_bHMI_Call_5_Up        : BOOL := FALSE;
+    g_bHMI_Call_5_Down      : BOOL := FALSE;
+    g_bHMI_Call_6_Up        : BOOL := FALSE;
+    g_bHMI_Call_6_Down      : BOOL := FALSE;
+    g_bHMI_Call_7_Up        : BOOL := FALSE;
+    g_bHMI_Call_7_Down      : BOOL := FALSE;
+    g_bHMI_Call_8_Up        : BOOL := FALSE;
+    g_bHMI_Call_8_Down      : BOOL := FALSE;
+    g_bHMI_Call_9_Up        : BOOL := FALSE;
+    g_bHMI_Call_9_Down      : BOOL := FALSE;
+    g_bHMI_Call_10_Down     : BOOL := FALSE;
+    
+    // Car calls — Elevator 1
+    g_bHMI_E1_Car_G         : BOOL := FALSE;
+    g_bHMI_E1_Car_1         : BOOL := FALSE;
+    g_bHMI_E1_Car_2         : BOOL := FALSE;
+    g_bHMI_E1_Car_3         : BOOL := FALSE;
+    g_bHMI_E1_Car_4         : BOOL := FALSE;
+    g_bHMI_E1_Car_5         : BOOL := FALSE;
+    g_bHMI_E1_Car_6         : BOOL := FALSE;
+    g_bHMI_E1_Car_7         : BOOL := FALSE;
+    g_bHMI_E1_Car_8         : BOOL := FALSE;
+    g_bHMI_E1_Car_9         : BOOL := FALSE;
+    g_bHMI_E1_Car_10        : BOOL := FALSE;
+    
+    // Car calls — Elevator 2
+    g_bHMI_E2_Car_G         : BOOL := FALSE;
+    g_bHMI_E2_Car_1         : BOOL := FALSE;
+    g_bHMI_E2_Car_2         : BOOL := FALSE;
+    g_bHMI_E2_Car_3         : BOOL := FALSE;
+    g_bHMI_E2_Car_4         : BOOL := FALSE;
+    g_bHMI_E2_Car_5         : BOOL := FALSE;
+    g_bHMI_E2_Car_6         : BOOL := FALSE;
+    g_bHMI_E2_Car_7         : BOOL := FALSE;
+    g_bHMI_E2_Car_8         : BOOL := FALSE;
+    g_bHMI_E2_Car_9         : BOOL := FALSE;
+    g_bHMI_E2_Car_10        : BOOL := FALSE;
+    
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <DUT Name="ST_PerformanceMetrics" Id="{cf0ee508-5824-451e-b791-9ab733963c9d}">
+    <Declaration><![CDATA[TYPE ST_PerformanceMetrics :
+STRUCT
+    fAvgResponseTime    : REAL;     // Seconds from button press to doors open
+    fAvgWaitTime        : REAL;     // Seconds spent waiting
+    fMaxWaitTime        : REAL;     // Longest wait today
+    fUtilizationE1      : REAL;     // Percentage (0-100)
+    fUtilizationE2      : REAL;     // Percentage (0-100)
+    iCallsToday         : DINT;     // Total calls since midnight
+    iCallsPerHour       : INT;      // Current hour's call rate
+    fEnergyEstimate     : REAL;     // Estimated kWh consumed
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

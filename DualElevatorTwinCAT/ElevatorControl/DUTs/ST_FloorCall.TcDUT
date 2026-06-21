@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <DUT Name="ST_FloorCall" Id="{1c3a317c-5caa-4203-946a-428389c19fad}">
+    <Declaration><![CDATA[TYPE ST_FloorCall :
+STRUCT
+    iFloor          : INT;          // Which floor (0 = Ground, 1-10)
+    eDirection      : E_Direction;  // For hall buttons: Up or Down
+    bIsCarCall      : BOOL;         // TRUE = pressed inside elevator, FALSE = hallway
+    tTimestamp      : TIME;         // When the button was pressed
+    iAssignedTo     : INT;          // 0 = not assigned yet, 1 = E1, 2 = E2
+    bIsActive       : BOOL;         // TRUE = still waiting, FALSE = completed
+    tWaitTime       : TIME;         // How long the person has been waiting
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

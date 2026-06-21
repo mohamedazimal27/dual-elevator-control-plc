@@ -1,4 +1,290 @@
 <?xml version="1.0"?>
 <TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.75">
-	<Project ProjectGUID="{0E8F4730-522F-4D46-86B5-F96C6B5E18DC}" ShowHideConfigurations="#x6"/>
+	<Project ProjectGUID="{0E8F4730-522F-4D46-86B5-F96C6B5E18DC}" Target64Bit="true" ShowHideConfigurations="#x6">
+		<System>
+			<Tasks>
+				<Task Id="3" Priority="20" CycleTime="100000" AmsPort="350" AdtTasks="true">
+					<Name>PlcTask</Name>
+				</Task>
+			</Tasks>
+		</System>
+		<Plc>
+			<Project GUID="{F22E1ECD-0141-4999-B299-497CAAA1A6A4}" Name="ElevatorControl" PrjFilePath="ElevatorControl\ElevatorControl.plcproj" TmcFilePath="ElevatorControl\ElevatorControl.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="ElevatorControl\ElevatorControl.tmc" TmcHash="{750DC53C-2791-D639-1543-DC846C73B930}">
+					<Name>ElevatorControl Instance</Name>
+					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
+					<Vars VarGrpType="2" AreaNo="1">
+						<Name>PlcTask Outputs</Name>
+						<Var>
+							<Name>GVL_IO.doE1_MotorUp</Name>
+							<Comment><![CDATA[ Drive motor up]]></Comment>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_MotorDown</Name>
+							<Comment><![CDATA[ Drive motor down]]></Comment>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_MotorStop</Name>
+							<Comment><![CDATA[ Brake / stop motor]]></Comment>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_DoorOpen</Name>
+							<Comment><![CDATA[ Open doors]]></Comment>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_DoorClose</Name>
+							<Comment><![CDATA[ Close doors]]></Comment>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_FloorInd_G</Name>
+							<Comment><![CDATA[ ------------------------------------------------------------------------
+ OUTPUTS — Elevator 1 Floor Indicators (LEDs in the cab)
+ ------------------------------------------------------------------------]]></Comment>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_FloorInd_1</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_FloorInd_2</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_FloorInd_3</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_FloorInd_4</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_FloorInd_5</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_FloorInd_6</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_FloorInd_7</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_FloorInd_8</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_FloorInd_9</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_FloorInd_10</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_DirUp</Name>
+							<Comment><![CDATA[ Elevator 1 direction arrows]]></Comment>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE1_DirDown</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_MotorUp</Name>
+							<Comment><![CDATA[ ------------------------------------------------------------------------
+ OUTPUTS — Elevator 2 Motor & Door Control
+ ------------------------------------------------------------------------]]></Comment>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_MotorDown</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_MotorStop</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_DoorOpen</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_DoorClose</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_FloorInd_G</Name>
+							<Comment><![CDATA[ ------------------------------------------------------------------------
+ OUTPUTS — Elevator 2 Floor Indicators
+ ------------------------------------------------------------------------]]></Comment>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_FloorInd_1</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_FloorInd_2</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_FloorInd_3</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_FloorInd_4</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_FloorInd_5</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_FloorInd_6</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_FloorInd_7</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_FloorInd_8</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_FloorInd_9</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_FloorInd_10</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_DirUp</Name>
+							<Comment><![CDATA[ Elevator 2 direction arrows]]></Comment>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doE2_DirDown</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_G_Up_LED</Name>
+							<Comment><![CDATA[ ------------------------------------------------------------------------
+ OUTPUTS — Hall Button LEDs (feedback that call is registered)
+ ------------------------------------------------------------------------]]></Comment>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_1_Up_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_1_Down_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_2_Up_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_2_Down_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_3_Up_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_3_Down_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_4_Up_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_4_Down_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_5_Up_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_5_Down_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_6_Up_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_6_Down_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_7_Up_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_7_Down_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_8_Up_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_8_Down_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_9_Up_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_9_Down_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doHall_10_Down_LED</Name>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doSystemAlarm</Name>
+							<Comment><![CDATA[ TRUE = any alarm active]]></Comment>
+							<Type>BIT</Type>
+						</Var>
+						<Var>
+							<Name>GVL_IO.doSystemReady</Name>
+							<Comment><![CDATA[ TRUE = system operational]]></Comment>
+							<Type>BIT</Type>
+						</Var>
+					</Vars>
+					<Contexts>
+						<Context>
+							<Id>0</Id>
+							<Name>PlcTask</Name>
+							<ManualConfig>
+								<OTCID>#x02010030</OTCID>
+							</ManualConfig>
+							<Priority>20</Priority>
+							<CycleTime>10000000</CycleTime>
+						</Context>
+					</Contexts>
+					<TaskPouOids>
+						<TaskPouOid Prio="20" OTCID="#x08502001"/>
+					</TaskPouOids>
+				</Instance>
+			</Project>
+		</Plc>
+	</Project>
 </TcSmProject>

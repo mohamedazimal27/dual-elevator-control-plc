@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <DUT Name="E_AlarmSeverity" Id="{ef40691d-db46-48d9-9cb4-0536462155a1}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_AlarmSeverity :
+(
+	eInfo       := 0,   // "Elevator arrived at floor 5" — just for logging
+    eWarning    := 1,   // "Door held open too long" — needs attention soon
+    eCritical   := 2,   // "Door mechanism fault" — elevator taken out of service
+    eEmergency  := 3    // "Fire alarm activated" — building evacuation protocol
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <DUT Name="ST_ElevatorStatus" Id="{50cea5fc-34a8-4f2d-9c3f-e8f62751d70f}">
+    <Declaration><![CDATA[TYPE ST_ElevatorStatus :
+STRUCT
+    iElevatorID     : INT;              // 1 = E1, 2 = E2
+    iCurrentFloor   : INT;              // Which floor it's at (0-10)
+    fPosition       : REAL;             // Smooth position 0.0-10.0 for animation
+    eState          : E_ElevatorState;  // What it's doing right now
+    eDirection      : E_Direction;      // Which way it's going
+    bDoorsOpen      : BOOL;             // TRUE = doors are open
+    fDoorOpenPercent: REAL;             // 0.0-100.0 for door animation width
+    iNextTarget     : INT;              // Next floor it's going to (-1 = none)
+    iQueueLength    : INT;              // How many calls pending
+    bOverload       : BOOL;             // TRUE = too heavy
+    bDoorObstruction: BOOL;             // TRUE = something blocking door
+    fTravelDistance : REAL;             // Total meters traveled (maintenance metric)
+    iTripCount      : DINT;             // Total completed trips
+    tLastMaintenance: TIME;             // Time since last service
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

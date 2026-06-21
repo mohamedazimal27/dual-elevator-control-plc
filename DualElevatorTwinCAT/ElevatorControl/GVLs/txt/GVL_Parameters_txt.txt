@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <GVL Name="GVL_Parameters" Id="{06ec73c4-8110-4768-bf32-ffc7eda2994b}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+// ============================================
+// GVL_Parameters — System Configuration
+// ============================================
+
+VAR_GLOBAL CONSTANT
+    // Building layout
+    c_iMinFloor         : INT := 0;         // Ground floor
+    c_iMaxFloor         : INT := 10;        // Top floor
+    c_iNumFloors        : INT := 11;        // Total (0 through 10)
+    c_iNumElevators     : INT := 2;         // Two elevators
+    
+    // Timing — how long things take
+    c_tDoorOpenTime     : TIME := T#3S;     // Doors stay open normally
+    c_tDoorOpenSlow     : TIME := T#5S;     // Accessibility mode (longer)
+    c_tFloorTravelTime  : TIME := T#2S;     // Seconds between floors
+    c_tDoorAnimTime     : TIME := T#1S;     // Door open/close animation
+    c_tOverloadDelay    : TIME := T#500MS;  // Before overload triggers
+    c_tObstructionDelay : TIME := T#200MS; // Before door obstruction alarms
+    c_tEmergencyDelay   : TIME := T#100MS; // Emergency stop response
+    c_tFireModeDelay    : TIME := T#1S;     // Fire mode activation
+    
+    // Performance limits
+    c_fMaxWaitTime      : REAL := 60.0;     // Seconds before we complain
+    c_iMaxQueueLength   : INT := 10;        // Per elevator
+    c_fMaxUtilization   : REAL := 90.0;     // Percent before warning
+    
+    // Safety limits
+    c_fMaxSpeed         : REAL := 2.5;      // m/s
+    c_fMaxAcceleration  : REAL := 1.0;      // m/s²
+    c_iMaxCapacity      : INT := 15;        // People
+    c_fMaxWeight        : REAL := 1000.0;   // kg
+    
+END_VAR
+
+VAR_GLOBAL
+    // Runtime parameters — can change via HMI
+    g_tDoorOpenTime     : TIME := c_tDoorOpenTime;
+    g_tFloorTravelTime  : TIME := c_tFloorTravelTime;
+    g_eTrafficMode      : E_TrafficMode := E_TrafficMode.eOffPeak;
+    g_bNightModeAuto    : BOOL := TRUE;
+    g_tNightStart       : TIME := T#22H;    // 10 PM
+    g_tNightEnd         : TIME := T#6H;       // 6 AM
+    
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

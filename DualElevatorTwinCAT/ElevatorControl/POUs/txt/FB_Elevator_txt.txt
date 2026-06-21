@@ -1,0 +1,646 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="FB_Elevator" Id="{0ae1fb21-5642-453f-b819-7f1ec8857490}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Elevator
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+VAR CONSTANT
+    cMAX_FLOORS : INT := 50;
+END_VAR
+
+// ============================================================================
+// INPUTS
+// ============================================================================
+VAR_INPUT
+    bEnable             : BOOL := FALSE;
+    bEmergencyStop      : BOOL := FALSE;
+    bFireMode           : BOOL := FALSE;
+    bDoorObstruction    : BOOL := FALSE;
+    bOverload           : BOOL := FALSE;
+    tDoorOpenTime       : TIME := T#3S;
+    tFloorTravelTime    : TIME := T#2S;
+    tDoorOpenDuration   : TIME := T#1S;
+    tDoorCloseDuration  : TIME := T#1S;
+    iMinFloor           : INT := 0;
+    iMaxFloor           : INT := 10;
+END_VAR
+
+// ============================================================================
+// OUTPUTS
+// ============================================================================
+VAR_OUTPUT
+    eState              : E_ElevatorState := E_ElevatorState.eIdle;
+    iCurrentFloor       : INT := 0;
+    eDirection          : E_Direction := E_Direction.eNone;
+    bDoorsOpen          : BOOL := FALSE;
+    fPosition           : REAL := 0.0;
+    fDoorOpenPercent    : REAL := 0.0;
+    iNextTarget         : INT := -1;
+    iQueueLength        : INT := 0;
+    bIsMoving           : BOOL := FALSE;
+    bIsReady            : BOOL := FALSE;
+    fTravelDistance     : REAL := 0.0;
+    iTripCount          : DINT := 0;
+END_VAR
+
+// ============================================================================
+// INTERNAL VARIABLES
+// ============================================================================
+VAR
+    _abCallQueue        : ARRAY[0..cMAX_FLOORS] OF BOOL;
+    _ePreviousState     : E_ElevatorState;
+    
+    // Timers
+    _tonDoorOpen        : TON;
+    _tonDoorClose       : TON;
+    _tonTravel          : TON;
+    _tonDoorObstruction : TON;
+    _tonOverload        : TON;
+    
+    // Timer enable flags (prevents double-calling TON)
+    _bTravelTimerEnable : BOOL := FALSE;
+    _bDoorOpenTimerEnable : BOOL := FALSE;
+    _bDoorCloseTimerEnable : BOOL := FALSE;
+    
+    // Position animation
+    _fPositionIncrement : REAL := 0.05;
+    _fLastPosition      : REAL := 0.0;
+    
+    // Safety flags
+    _bEmergencyActive   : BOOL := FALSE;
+    _bFireModeActive    : BOOL := FALSE;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// ======================================================================
+// SAFETY CHECKS (highest priority)
+// ======================================================================
+IF bEmergencyStop AND NOT _bEmergencyActive THEN
+    EmergencyStop();
+ELSE
+    // ======================================================================
+    // OVERLOAD CHECK
+    // ======================================================================
+    _tonOverload(IN := bOverload, PT := T#500MS);
+    IF _tonOverload.Q THEN
+        eState := E_ElevatorState.eOverload;
+        bDoorsOpen := TRUE;
+        fDoorOpenPercent := 100.0;
+    ELSE
+        // ======================================================================
+        // FIRE MODE CHECK
+        // ======================================================================
+        IF bFireMode AND NOT _bFireModeActive THEN
+            FireModeActivate();
+        ELSE
+            // ======================================================================
+            // MAIN STATE MACHINE
+            // ======================================================================
+            CASE eState OF
+                
+                // --------------------------------------------------------------
+                // IDLE
+                // --------------------------------------------------------------
+                E_ElevatorState.eIdle:
+                    bIsMoving := FALSE;
+                    bIsReady := TRUE;
+                    eDirection := E_Direction.eNone;
+                    
+                    iNextTarget := GetNextTarget();
+                    
+                    IF iNextTarget >= 0 THEN
+                        IF iNextTarget > iCurrentFloor THEN
+                            eDirection := E_Direction.eUp;
+                            eState := E_ElevatorState.eMovingUp;
+                            _bTravelTimerEnable := TRUE;
+                        ELSIF iNextTarget < iCurrentFloor THEN
+                            eDirection := E_Direction.eDown;
+                            eState := E_ElevatorState.eMovingDown;
+                            _bTravelTimerEnable := TRUE;
+                        ELSE
+                            eState := E_ElevatorState.eDoorsOpening;
+                        END_IF;
+                    END_IF;
+                    
+                // --------------------------------------------------------------
+                // MOVING UP
+                // --------------------------------------------------------------
+                E_ElevatorState.eMovingUp:
+                    bIsMoving := TRUE;
+                    bIsReady := FALSE;
+                    UpdatePosition();
+                    
+                    _tonTravel(IN := _bTravelTimerEnable, PT := tFloorTravelTime);
+                    
+                    IF _tonTravel.Q THEN
+                        _bTravelTimerEnable := FALSE;
+                        iCurrentFloor := iCurrentFloor + 1;
+                        
+                        IF iCurrentFloor = iNextTarget THEN
+                            fPosition := INT_TO_REAL(iCurrentFloor);
+                            ClearCall(iCurrentFloor);
+                            eState := E_ElevatorState.eDoorsOpening;
+                            iTripCount := iTripCount + 1;
+                        ELSE
+                            _bTravelTimerEnable := TRUE;
+                        END_IF;
+                    END_IF;
+                    
+                    IF bDoorObstruction THEN
+                        _tonDoorObstruction(IN := TRUE, PT := T#100MS);
+                        IF _tonDoorObstruction.Q THEN
+                            eState := E_ElevatorState.eDoorsOpening;
+                        END_IF;
+                    ELSE
+                        _tonDoorObstruction(IN := FALSE);
+                    END_IF;
+                    
+                // --------------------------------------------------------------
+                // MOVING DOWN
+                // --------------------------------------------------------------
+                E_ElevatorState.eMovingDown:
+                    bIsMoving := TRUE;
+                    bIsReady := FALSE;
+                    UpdatePosition();
+                    
+                    _tonTravel(IN := _bTravelTimerEnable, PT := tFloorTravelTime);
+                    
+                    IF _tonTravel.Q THEN
+                        _bTravelTimerEnable := FALSE;
+                        iCurrentFloor := iCurrentFloor - 1;
+                        
+                        IF iCurrentFloor = iNextTarget THEN
+                            fPosition := INT_TO_REAL(iCurrentFloor);
+                            ClearCall(iCurrentFloor);
+                            eState := E_ElevatorState.eDoorsOpening;
+                            iTripCount := iTripCount + 1;
+                        ELSE
+                            _bTravelTimerEnable := TRUE;
+                        END_IF;
+                    END_IF;
+                    
+                    IF bDoorObstruction THEN
+                        _tonDoorObstruction(IN := TRUE, PT := T#100MS);
+                        IF _tonDoorObstruction.Q THEN
+                            eState := E_ElevatorState.eDoorsOpening;
+                        END_IF;
+                    ELSE
+                        _tonDoorObstruction(IN := FALSE);
+                    END_IF;
+                    
+                // --------------------------------------------------------------
+                // DOORS OPENING
+                // --------------------------------------------------------------
+                E_ElevatorState.eDoorsOpening:
+                    bIsMoving := FALSE;
+                    bDoorsOpen := TRUE;
+                    UpdateDoorAnimation();
+                    
+                    _bDoorOpenTimerEnable := TRUE;
+                    _tonDoorOpen(IN := _bDoorOpenTimerEnable, PT := tDoorOpenDuration);
+                    
+                    IF _tonDoorOpen.Q THEN
+                        _bDoorOpenTimerEnable := FALSE;
+                        eState := E_ElevatorState.eDoorsOpen;
+                        fDoorOpenPercent := 100.0;
+                    END_IF;
+                    
+                // --------------------------------------------------------------
+                // DOORS OPEN
+                // --------------------------------------------------------------
+                E_ElevatorState.eDoorsOpen:
+                    bDoorsOpen := TRUE;
+                    fDoorOpenPercent := 100.0;
+                    
+                    IF bDoorObstruction THEN
+                        _bDoorCloseTimerEnable := FALSE;
+                    END_IF;
+                    
+                    iNextTarget := GetNextTarget();
+                    IF iNextTarget >= 0 AND iNextTarget <> iCurrentFloor THEN
+                        _bDoorCloseTimerEnable := FALSE;
+                        eState := E_ElevatorState.eDoorsClosing;
+                    END_IF;
+                    
+                    _bDoorCloseTimerEnable := TRUE;
+                    _tonDoorClose(IN := _bDoorCloseTimerEnable, PT := tDoorOpenTime);
+                    
+                    IF _tonDoorClose.Q AND NOT bDoorObstruction THEN
+                        _bDoorCloseTimerEnable := FALSE;
+                        eState := E_ElevatorState.eDoorsClosing;
+                    END_IF;
+                    
+                // --------------------------------------------------------------
+                // DOORS CLOSING
+                // --------------------------------------------------------------
+                E_ElevatorState.eDoorsClosing:
+                    UpdateDoorAnimation();
+                    
+                    _bDoorCloseTimerEnable := TRUE;
+                    _tonDoorClose(IN := _bDoorCloseTimerEnable, PT := tDoorCloseDuration);
+                    
+                    IF _tonDoorClose.Q THEN
+                        _bDoorCloseTimerEnable := FALSE;
+                        bDoorsOpen := FALSE;
+                        fDoorOpenPercent := 0.0;
+                        
+                        iNextTarget := GetNextTarget();
+                        
+                        IF iNextTarget >= 0 THEN
+                            IF iNextTarget > iCurrentFloor THEN
+                                eDirection := E_Direction.eUp;
+                                eState := E_ElevatorState.eMovingUp;
+                                _bTravelTimerEnable := TRUE;
+                            ELSIF iNextTarget < iCurrentFloor THEN
+                                eDirection := E_Direction.eDown;
+                                eState := E_ElevatorState.eMovingDown;
+                                _bTravelTimerEnable := TRUE;
+                            ELSE
+                                eState := E_ElevatorState.eDoorsOpening;
+                            END_IF;
+                        ELSE
+                            eState := E_ElevatorState.eIdle;
+                            eDirection := E_Direction.eNone;
+                        END_IF;
+                    END_IF;
+                    
+                    IF bDoorObstruction THEN
+                        _bDoorCloseTimerEnable := FALSE;
+                        eState := E_ElevatorState.eDoorsOpening;
+                    END_IF;
+                    
+                // --------------------------------------------------------------
+                // EMERGENCY STOP
+                // --------------------------------------------------------------
+                E_ElevatorState.eEmergencyStop:
+                    bIsMoving := FALSE;
+                    bIsReady := FALSE;
+                    
+                    IF NOT bEmergencyStop AND _bEmergencyActive THEN
+                        ResetEmergency();
+                    END_IF;
+                    
+                // --------------------------------------------------------------
+                // FIRE MODE
+                // --------------------------------------------------------------
+                E_ElevatorState.eFireMode:
+                    bIsReady := FALSE;
+                    
+                    IF iCurrentFloor > 0 THEN
+                        eDirection := E_Direction.eDown;
+                        UpdatePosition();
+                        
+                        _bTravelTimerEnable := TRUE;
+                        _tonTravel(IN := _bTravelTimerEnable, PT := tFloorTravelTime);
+                        
+                        IF _tonTravel.Q THEN
+                            _bTravelTimerEnable := FALSE;
+                            iCurrentFloor := iCurrentFloor - 1;
+                            IF iCurrentFloor = 0 THEN
+                                fPosition := 0.0;
+                                bDoorsOpen := TRUE;
+                                fDoorOpenPercent := 100.0;
+                            END_IF;
+                        END_IF;
+                    ELSE
+                        bDoorsOpen := TRUE;
+                        fDoorOpenPercent := 100.0;
+                    END_IF;
+                    
+                    IF NOT bFireMode AND _bFireModeActive THEN
+                        ResetFireMode();
+                    END_IF;
+                    
+                // --------------------------------------------------------------
+                // OVERLOAD
+                // --------------------------------------------------------------
+                E_ElevatorState.eOverload:
+                    bIsMoving := FALSE;
+                    bIsReady := FALSE;
+                    bDoorsOpen := TRUE;
+                    fDoorOpenPercent := 100.0;
+                    
+                    IF NOT bOverload THEN
+                        _tonOverload(IN := FALSE);
+                        eState := E_ElevatorState.eDoorsClosing;
+                    END_IF;
+                    
+            END_CASE;
+        END_IF;
+    END_IF;
+END_IF;
+
+// Track state changes
+IF eState <> _ePreviousState THEN
+    _ePreviousState := eState;
+END_IF;]]></ST>
+    </Implementation>
+    <Method Name="CallFloor" Id="{00465dc2-035d-4b81-8fd9-1d6d5eb9e7d2}">
+      <Declaration><![CDATA[METHOD PUBLIC CallFloor : BOOL
+VAR_INPUT
+	iFloor : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF iFloor < iMinFloor OR iFloor > iMaxFloor THEN
+    CallFloor := FALSE;
+    RETURN;
+END_IF;
+
+IF NOT _abCallQueue[iFloor] THEN
+    _abCallQueue[iFloor] := TRUE;
+    iQueueLength := iQueueLength + 1;
+END_IF;
+
+CallFloor := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ClearCall" Id="{b11cea57-d08b-433f-89ef-da567bafb291}">
+      <Declaration><![CDATA[METHOD PUBLIC ClearCall : BOOL
+VAR_INPUT
+    iFloor : INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF iFloor >= iMinFloor AND iFloor <= iMaxFloor THEN
+    IF _abCallQueue[iFloor] THEN
+        _abCallQueue[iFloor] := FALSE;
+        iQueueLength := iQueueLength - 1;
+        ClearCall := TRUE;
+    ELSE
+        ClearCall := FALSE;
+    END_IF;
+ELSE
+    ClearCall := FALSE;
+END_IF;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="EmergencyStop" Id="{5ca8e4d7-bd42-4e0a-8196-177b1a77c374}">
+      <Declaration><![CDATA[METHOD PUBLIC EmergencyStop : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_bEmergencyActive := TRUE;
+
+IF eState <> E_ElevatorState.eMovingUp AND 
+   eState <> E_ElevatorState.eMovingDown THEN
+    eState := E_ElevatorState.eEmergencyStop;
+END_IF;
+
+IF ABS(fPosition - INT_TO_REAL(iCurrentFloor)) < 0.1 THEN
+    bDoorsOpen := TRUE;
+    fDoorOpenPercent := 100.0;
+END_IF;
+
+EmergencyStop := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FireModeActivate" Id="{5579dddb-6518-4f96-912a-767236cf170d}">
+      <Declaration><![CDATA[METHOD PUBLIC FireModeActivate : BOOL
+VAR
+	i	:	INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_bFireModeActive := TRUE;
+
+// Clear entire queue
+FOR i := 0 TO cMAX_FLOORS DO
+    _abCallQueue[i] := FALSE;
+END_FOR;
+
+iQueueLength := 0;
+
+// If not at ground, go there
+IF iCurrentFloor <> 0 THEN
+    _abCallQueue[0] := TRUE;
+    iQueueLength := 1;
+END_IF;
+
+eState := E_ElevatorState.eFireMode;
+FireModeActivate := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetNextTarget" Id="{e3303d05-9174-4238-9656-3eeecda790dd}">
+      <Declaration><![CDATA[METHOD PRIVATE GetNextTarget : INT
+VAR
+	i : INT;
+    iBestFloor : INT := -1;
+    fBestDistance : REAL := 999.0;
+    fCurrentDistance : REAL;
+    bHasUpRequest : BOOL := FALSE;
+    bHasDownRequest : BOOL := FALSE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF iQueueLength = 0 THEN
+    GetNextTarget := -1;
+    RETURN;
+END_IF;
+
+// SCAN algorithm: serve all in current direction, then reverse
+
+// First: look for requests in CURRENT direction
+IF eDirection = E_Direction.eUp OR eDirection = E_Direction.eNone THEN
+    // Look for floors ABOVE current
+    FOR i := iCurrentFloor + 1 TO iMaxFloor DO
+        IF _abCallQueue[i] THEN
+            GetNextTarget := i;
+            RETURN;
+        END_IF;
+    END_FOR;
+END_IF;
+
+IF eDirection = E_Direction.eDown OR eDirection = E_Direction.eNone THEN
+    // Look for floors BELOW current
+    FOR i := iCurrentFloor - 1 TO iMinFloor BY -1 DO
+        IF _abCallQueue[i] THEN
+            GetNextTarget := i;
+            RETURN;
+        END_IF;
+    END_FOR;
+END_IF;
+
+// If nothing in current direction, reverse and look
+IF eDirection = E_Direction.eUp THEN
+    // Now look below (reverse direction)
+    FOR i := iCurrentFloor - 1 TO iMinFloor BY -1 DO
+        IF _abCallQueue[i] THEN
+            GetNextTarget := i;
+            RETURN;
+        END_IF;
+    END_FOR;
+ELSIF eDirection = E_Direction.eDown THEN
+    // Now look above (reverse direction)
+    FOR i := iCurrentFloor + 1 TO iMaxFloor DO
+        IF _abCallQueue[i] THEN
+            GetNextTarget := i;
+            RETURN;
+        END_IF;
+    END_FOR;
+END_IF;
+
+// If current floor has a call, serve it
+IF _abCallQueue[iCurrentFloor] THEN
+    GetNextTarget := iCurrentFloor;
+    RETURN;
+END_IF;
+
+// Fallback: nearest floor (should rarely reach here)
+FOR i := iMinFloor TO iMaxFloor DO
+    IF _abCallQueue[i] THEN
+        fCurrentDistance := ABS(INT_TO_REAL(i) - fPosition);
+        IF fCurrentDistance < fBestDistance THEN
+            fBestDistance := fCurrentDistance;
+            iBestFloor := i;
+        END_IF;
+    END_IF;
+END_FOR;
+
+GetNextTarget := iBestFloor;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetStatus" Id="{a10b91c2-35ac-4770-84f2-cfb9ac77c810}">
+      <Declaration><![CDATA[METHOD PUBLIC GetStatus : ST_ElevatorStatus
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[GetStatus.iCurrentFloor := iCurrentFloor;
+GetStatus.fPosition := fPosition;
+GetStatus.eState := eState;
+GetStatus.eDirection := eDirection;
+GetStatus.bDoorsOpen := bDoorsOpen;
+GetStatus.fDoorOpenPercent := fDoorOpenPercent;
+GetStatus.iNextTarget := iNextTarget;
+GetStatus.iQueueLength := iQueueLength;
+GetStatus.bOverload := bOverload;
+GetStatus.bDoorObstruction := bDoorObstruction;
+GetStatus.fTravelDistance := fTravelDistance;
+GetStatus.iTripCount := iTripCount;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ResetEmergency" Id="{fe45c278-ef04-4994-b2f1-b388522bc9f3}">
+      <Declaration><![CDATA[METHOD PUBLIC ResetEmergency : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _bEmergencyActive AND NOT bEmergencyStop THEN
+    _bEmergencyActive := FALSE;
+    eState := E_ElevatorState.eIdle;
+    eDirection := E_Direction.eNone;
+    ResetEmergency := TRUE;
+ELSE
+    ResetEmergency := FALSE;
+END_IF;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ResetFireMode" Id="{1781a704-b29b-4f7c-a29a-3ca3b36c0bd3}">
+      <Declaration><![CDATA[METHOD PUBLIC ResetFireMode : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _bFireModeActive AND NOT bFireMode THEN
+    _bFireModeActive := FALSE;
+    eState := E_ElevatorState.eIdle;
+    eDirection := E_Direction.eNone;
+    ResetFireMode := TRUE;
+ELSE
+    ResetFireMode := FALSE;
+END_IF;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UpdateDoorAnimation" Id="{febbca1e-93af-4c32-a691-facf292fa80e}">
+      <Declaration><![CDATA[METHOD PRIVATE UpdateDoorAnimation : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF eState = E_ElevatorState.eDoorsOpening THEN
+    fDoorOpenPercent := fDoorOpenPercent + 5.0;
+    IF fDoorOpenPercent >= 100.0 THEN
+        fDoorOpenPercent := 100.0;
+    END_IF;
+ELSIF eState = E_ElevatorState.eDoorsClosing THEN
+    fDoorOpenPercent := fDoorOpenPercent - 5.0;
+    IF fDoorOpenPercent <= 0.0 THEN
+        fDoorOpenPercent := 0.0;
+    END_IF;
+END_IF;
+
+UpdateDoorAnimation := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UpdatePosition" Id="{7fcba25f-dfc5-455a-b06a-f9859f9d2ae3}">
+      <Declaration><![CDATA[METHOD PRIVATE UpdatePosition : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF eState = E_ElevatorState.eMovingUp THEN
+    fPosition := fPosition + _fPositionIncrement;
+    IF fPosition > INT_TO_REAL(iMaxFloor) THEN
+        fPosition := INT_TO_REAL(iMaxFloor);
+    END_IF;
+ELSIF eState = E_ElevatorState.eMovingDown THEN
+    fPosition := fPosition - _fPositionIncrement;
+    IF fPosition < INT_TO_REAL(iMinFloor) THEN
+        fPosition := INT_TO_REAL(iMinFloor);
+    END_IF;
+END_IF;
+
+fTravelDistance := fTravelDistance + ABS(fPosition - _fLastPosition);
+_fLastPosition := fPosition;
+
+UpdatePosition := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Elevator">
+      <LineId Id="195" Count="260" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Elevator.CallFloor">
+      <LineId Id="7" Count="9" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Elevator.ClearCall">
+      <LineId Id="10" Count="9" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Elevator.EmergencyStop">
+      <LineId Id="6" Count="11" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Elevator.FireModeActivate">
+      <LineId Id="12" Count="15" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Elevator.GetNextTarget">
+      <LineId Id="22" Count="63" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Elevator.GetStatus">
+      <LineId Id="12" Count="10" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Elevator.ResetEmergency">
+      <LineId Id="6" Count="6" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Elevator.ResetFireMode">
+      <LineId Id="8" Count="6" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Elevator.UpdateDoorAnimation">
+      <LineId Id="8" Count="11" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Elevator.UpdatePosition">
+      <LineId Id="8" Count="14" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

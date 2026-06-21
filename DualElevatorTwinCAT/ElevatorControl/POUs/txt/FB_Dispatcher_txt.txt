@@ -1,0 +1,370 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="FB_Dispatcher" Id="{68e47f5b-f8b3-4f5d-b748-688a8fbc0d6d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Dispatcher
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+VAR CONSTANT
+    cMAX_QUEUE_SIZE : INT := 50;
+END_VAR
+
+// ============================================================================
+// INPUTS
+// ============================================================================
+VAR_INPUT
+    // References to elevators (Composition pattern)
+    refE1               : REFERENCE TO FB_Elevator;
+    refE2               : REFERENCE TO FB_Elevator;
+    
+    // Traffic mode selection
+    eTrafficMode        : E_TrafficMode := E_TrafficMode.eOffPeak;
+    
+    // System enable
+    bEnable             : BOOL := TRUE;
+END_VAR
+
+// ============================================================================
+// OUTPUTS
+// ============================================================================
+VAR_OUTPUT
+    // Assignment tracking
+    iAssignedToE1       : INT := 0;
+    iAssignedToE2       : INT := 0;
+    iUnassignedCalls    : INT := 0;
+    
+    // Performance metrics
+    stMetrics           : ST_PerformanceMetrics;
+END_VAR
+
+// ============================================================================
+// INTERNAL VARIABLES
+// ============================================================================
+VAR
+    // Call queue
+    _astCallQueue       : ARRAY[0..cMAX_QUEUE_SIZE] OF ST_FloorCall;
+    _iQueueHead         : INT := 0;
+    _iQueueTail         : INT := 0;
+    _iQueueCount        : INT := 0;
+    
+    // Statistics
+    _iTotalCalls        : DINT := 0;
+    _fTotalWaitTime     : REAL := 0.0;
+    _fMaxWaitTime       : REAL := 0.0;
+    
+    // Night mode
+    _bNightModeActive   : BOOL := FALSE;
+    _iActiveElevator    : INT := 1;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="AddCall" Id="{cccd0045-65d4-4edb-9e65-d01cef984b5c}">
+      <Declaration><![CDATA[METHOD PUBLIC AddCall : BOOL
+VAR_INPUT
+    iFloor          : INT;
+    eDirection      : E_Direction;
+    bIsCarCall      : BOOL;
+    iElevatorID     : INT;  // 0=hall call, 1=E1 car call, 2=E2 car call
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _iQueueCount >= cMAX_QUEUE_SIZE THEN
+    AddCall := FALSE;
+    RETURN;
+END_IF;
+
+_astCallQueue[_iQueueTail].iFloor := iFloor;
+_astCallQueue[_iQueueTail].eDirection := eDirection;
+_astCallQueue[_iQueueTail].bIsCarCall := bIsCarCall;
+_astCallQueue[_iQueueTail].tTimestamp := TIME();
+_astCallQueue[_iQueueTail].iAssignedTo := 0;
+_astCallQueue[_iQueueTail].bIsActive := TRUE;
+_astCallQueue[_iQueueTail].tWaitTime := T#0S;
+
+_iQueueTail := (_iQueueTail + 1) MOD (cMAX_QUEUE_SIZE + 1);
+_iQueueCount := _iQueueCount + 1;
+_iTotalCalls := _iTotalCalls + 1;
+
+AddCall := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="CalculateMetrics" Id="{019ad200-f15c-48d2-9362-9ffc90f0a12f}">
+      <Declaration><![CDATA[METHOD PRIVATE CalculateMetrics : BOOL
+VAR
+	fTotalDistance : REAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _iTotalCalls > 0 THEN
+    stMetrics.fAvgResponseTime := _fTotalWaitTime / DINT_TO_REAL(_iTotalCalls);
+ELSE
+    stMetrics.fAvgResponseTime := 0.0;
+END_IF;
+
+stMetrics.fAvgWaitTime := stMetrics.fAvgResponseTime;
+stMetrics.fMaxWaitTime := _fMaxWaitTime;
+
+IF refE1.eState <> E_ElevatorState.eIdle AND 
+   refE1.eState <> E_ElevatorState.eEmergencyStop THEN
+    stMetrics.fUtilizationE1 := 85.0;
+ELSE
+    stMetrics.fUtilizationE1 := 15.0;
+END_IF;
+
+IF refE2.eState <> E_ElevatorState.eIdle AND 
+   refE2.eState <> E_ElevatorState.eEmergencyStop THEN
+    stMetrics.fUtilizationE2 := 85.0;
+ELSE
+    stMetrics.fUtilizationE2 := 15.0;
+END_IF;
+
+stMetrics.iCallsToday := _iTotalCalls;
+
+fTotalDistance := refE1.fTravelDistance + refE2.fTravelDistance;
+stMetrics.fEnergyEstimate := fTotalDistance * 0.15;
+
+CalculateMetrics := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ClearAllCalls" Id="{28dc36f0-09d6-4f5e-b7d0-ea9036da32d9}">
+      <Declaration><![CDATA[METHOD PUBLIC ClearAllCalls : BOOL
+VAR
+	i	: INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i := 0 TO cMAX_QUEUE_SIZE DO
+    _astCallQueue[i].bIsActive := FALSE;
+END_FOR;
+
+_iQueueCount := 0;
+_iQueueHead := 0;
+_iQueueTail := 0;
+
+ClearAllCalls := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetQueueStatus" Id="{00af5095-fb0f-4fa1-85fa-e811d67f8328}">
+      <Declaration><![CDATA[METHOD PUBLIC GetQueueStatus : AT_FloorCalls
+VAR
+	i : INT;
+    j : INT := 0;
+    aResult : AT_FloorCalls;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i := 0 TO cMAX_QUEUE_SIZE DO
+    IF _astCallQueue[i].bIsActive THEN
+        aResult[j] := _astCallQueue[i];
+        j := j + 1;
+        IF j > cMAX_QUEUE_SIZE THEN
+            EXIT;
+        END_IF;
+    END_IF;
+END_FOR;
+
+GetQueueStatus := aResult;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ProcessQueue" Id="{a8a7a065-7778-4276-b323-daa8f4821469}">
+      <Declaration><![CDATA[METHOD ProcessQueue : BOOL
+VAR
+	i                   : INT;
+    fScoreE1            : REAL;
+    fScoreE2            : REAL;
+    fDistanceE1         : REAL;
+    fDistanceE2         : REAL;
+    bE1CanServe         : BOOL;
+    bE2CanServe         : BOOL;
+    iE1Floor            : INT;
+    iE2Floor            : INT;
+    eE1Dir              : E_Direction;
+    eE2Dir              : E_Direction;
+    eE1State            : E_ElevatorState;
+    eE2State            : E_ElevatorState;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bEnable THEN
+    ProcessQueue := FALSE;
+    RETURN;
+END_IF;
+
+// Get current elevator states
+iE1Floor := refE1.iCurrentFloor;
+iE2Floor := refE2.iCurrentFloor;
+eE1Dir := refE1.eDirection;
+eE2Dir := refE2.eDirection;
+eE1State := refE1.eState;
+eE2State := refE2.eState;
+
+// Night mode handling
+IF eTrafficMode = E_TrafficMode.eNightMode THEN
+    IF NOT _bNightModeActive THEN
+        _bNightModeActive := TRUE;
+        IF _iActiveElevator = 1 THEN
+            refE2.CallFloor(0);
+        ELSE
+            refE1.CallFloor(0);
+        END_IF;
+    END_IF;
+ELSE
+    _bNightModeActive := FALSE;
+END_IF;
+
+// Process each unassigned call
+FOR i := 0 TO cMAX_QUEUE_SIZE DO
+    IF _astCallQueue[i].bIsActive AND _astCallQueue[i].iAssignedTo = 0 THEN
+        
+        // Calculate distances
+        fDistanceE1 := ABS(INT_TO_REAL(iE1Floor - _astCallQueue[i].iFloor));
+        fDistanceE2 := ABS(INT_TO_REAL(iE2Floor - _astCallQueue[i].iFloor));
+        
+        // Direction compatibility
+        bE1CanServe := (eE1Dir = E_Direction.eNone) OR 
+                       (eE1Dir = _astCallQueue[i].eDirection) OR
+                       _astCallQueue[i].bIsCarCall;
+        bE2CanServe := (eE2Dir = E_Direction.eNone) OR 
+                       (eE2Dir = _astCallQueue[i].eDirection) OR
+                       _astCallQueue[i].bIsCarCall;
+        
+        // Base scores
+        fScoreE1 := fDistanceE1;
+        fScoreE2 := fDistanceE2;
+        
+        // Direction bonus
+        IF bE1CanServe AND eE1Dir = _astCallQueue[i].eDirection THEN
+            fScoreE1 := fScoreE1 * 0.6;
+        END_IF;
+        IF bE2CanServe AND eE2Dir = _astCallQueue[i].eDirection THEN
+            fScoreE2 := fScoreE2 * 0.6;
+        END_IF;
+        
+        // Traffic mode adjustments
+        CASE eTrafficMode OF
+            E_TrafficMode.eUpPeak:
+                IF _astCallQueue[i].iFloor = 0 AND _astCallQueue[i].eDirection = E_Direction.eUp THEN
+                    fScoreE1 := fScoreE1 * 0.7;
+                END_IF;
+                
+            E_TrafficMode.eDownPeak:
+                IF _astCallQueue[i].eDirection = E_Direction.eDown THEN
+                    fScoreE2 := fScoreE2 * 0.7;
+                END_IF;
+                
+            E_TrafficMode.eNightMode:
+                IF _iActiveElevator = 1 THEN
+                    fScoreE2 := 999.0;
+                ELSE
+                    fScoreE1 := 999.0;
+                END_IF;
+                
+        END_CASE;
+        
+        // Availability check
+        IF eE1State = E_ElevatorState.eEmergencyStop OR 
+           eE1State = E_ElevatorState.eFireMode OR 
+           eE1State = E_ElevatorState.eMaintenance THEN
+            fScoreE1 := 999.0;
+        END_IF;
+        IF eE2State = E_ElevatorState.eEmergencyStop OR 
+           eE2State = E_ElevatorState.eFireMode OR 
+           eE2State = E_ElevatorState.eMaintenance THEN
+            fScoreE2 := 999.0;
+        END_IF;
+        
+        // Assign to best elevator
+        IF fScoreE1 <= fScoreE2 THEN
+            _astCallQueue[i].iAssignedTo := 1;
+            refE1.CallFloor(_astCallQueue[i].iFloor);
+            iAssignedToE1 := iAssignedToE1 + 1;
+        ELSE
+            _astCallQueue[i].iAssignedTo := 2;
+            refE2.CallFloor(_astCallQueue[i].iFloor);
+            iAssignedToE2 := iAssignedToE2 + 1;
+        END_IF;
+        
+    END_IF;
+END_FOR;
+
+// Update completed calls and metrics
+UpdateQueueStatus();
+CalculateMetrics();
+
+ProcessQueue := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UpdateQueueStatus" Id="{1b0628b7-0090-47e0-82ad-c4f278173a07}">
+      <Declaration><![CDATA[METHOD PRIVATE UpdateQueueStatus : BOOL
+VAR
+	i : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i := 0 TO cMAX_QUEUE_SIZE DO
+    IF _astCallQueue[i].bIsActive THEN
+        
+        // Update wait time
+        _astCallQueue[i].tWaitTime := _astCallQueue[i].tWaitTime + TIME();
+        
+        // Check if call completed
+        IF _astCallQueue[i].iAssignedTo = 1 THEN
+            IF refE1.iCurrentFloor = _astCallQueue[i].iFloor AND 
+               refE1.eState = E_ElevatorState.eDoorsOpen THEN
+                _astCallQueue[i].bIsActive := FALSE;
+                _iQueueCount := _iQueueCount - 1;
+                
+                _fTotalWaitTime := _fTotalWaitTime + TIME_TO_REAL(_astCallQueue[i].tWaitTime);
+                IF TIME_TO_REAL(_astCallQueue[i].tWaitTime) > _fMaxWaitTime THEN
+                    _fMaxWaitTime := TIME_TO_REAL(_astCallQueue[i].tWaitTime);
+                END_IF;
+            END_IF;
+        ELSIF _astCallQueue[i].iAssignedTo = 2 THEN
+            IF refE2.iCurrentFloor = _astCallQueue[i].iFloor AND 
+               refE2.eState = E_ElevatorState.eDoorsOpen THEN
+                _astCallQueue[i].bIsActive := FALSE;
+                _iQueueCount := _iQueueCount - 1;
+                
+                _fTotalWaitTime := _fTotalWaitTime + TIME_TO_REAL(_astCallQueue[i].tWaitTime);
+                IF TIME_TO_REAL(_astCallQueue[i].tWaitTime) > _fMaxWaitTime THEN
+                    _fMaxWaitTime := TIME_TO_REAL(_astCallQueue[i].tWaitTime);
+                END_IF;
+            END_IF;
+        END_IF;
+        
+    END_IF;
+END_FOR;
+
+UpdateQueueStatus := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Dispatcher">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Dispatcher.AddCall">
+      <LineId Id="14" Count="16" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Dispatcher.CalculateMetrics">
+      <LineId Id="12" Count="27" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Dispatcher.ClearAllCalls">
+      <LineId Id="12" Count="7" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Dispatcher.GetQueueStatus">
+      <LineId Id="16" Count="9" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Dispatcher.ProcessQueue">
+      <LineId Id="23" Count="105" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Dispatcher.UpdateQueueStatus">
+      <LineId Id="11" Count="33" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

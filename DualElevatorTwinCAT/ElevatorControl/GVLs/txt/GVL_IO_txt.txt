@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <GVL Name="GVL_IO" Id="{5615c105-42b9-45c3-983e-3fd3c0463930}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+// ============================================
+// GVL_IO — Physical Input/Output Mapping
+// ============================================
+
+VAR_GLOBAL
+    // ------------------------------------------------------------------------
+    // HALL CALL BUTTONS (People waiting in hallways)
+    // ------------------------------------------------------------------------
+    // Ground floor — only Up button
+    diHall_G_Up	: BOOL;
+    
+    // Floors 1-9 — Up and Down buttons
+    diHall_1_Up         : BOOL;
+    diHall_1_Down       : BOOL;
+                        
+    diHall_2_Up         : BOOL;
+    diHall_2_Down       : BOOL;
+                        
+    diHall_3_Up         : BOOL;
+    diHall_3_Down       : BOOL;
+                        
+    diHall_4_Up         : BOOL;
+    diHall_4_Down       : BOOL;
+                        
+    diHall_5_Up         : BOOL;
+    diHall_5_Down       : BOOL;
+                        
+    diHall_6_Up         : BOOL;
+    diHall_6_Down       : BOOL;
+                        
+    diHall_7_Up         : BOOL;
+    diHall_7_Down       : BOOL;
+                        
+    diHall_8_Up         : BOOL;
+    diHall_8_Down       : BOOL;
+                        
+    diHall_9_Up         : BOOL;
+    diHall_9_Down       : BOOL;
+    
+    // Floor 10 — only Down button (top floor)
+    diHall_10_Down      : BOOL;
+    
+    // ------------------------------------------------------------------------
+    // CAR CALL BUTTONS (People inside elevators)
+    // ------------------------------------------------------------------------
+    // Elevator 1 — buttons for floors G through 10
+    diE1_Car_G   : BOOL;
+    diE1_Car_1   : BOOL;
+    diE1_Car_2   : BOOL;
+    diE1_Car_3   : BOOL;
+    diE1_Car_4   : BOOL;
+    diE1_Car_5   : BOOL;
+    diE1_Car_6   : BOOL;
+    diE1_Car_7   : BOOL;
+    diE1_Car_8   : BOOL;
+    diE1_Car_9   : BOOL;
+    diE1_Car_10  : BOOL;
+    
+    // Elevator 2 — buttons for floors G through 10
+    diE2_Car_G     : BOOL;
+    diE2_Car_1     : BOOL;
+    diE2_Car_2     : BOOL;
+    diE2_Car_3     : BOOL;
+    diE2_Car_4     : BOOL;
+    diE2_Car_5     : BOOL;
+    diE2_Car_6     : BOOL;
+    diE2_Car_7     : BOOL;
+    diE2_Car_8     : BOOL;
+    diE2_Car_9     : BOOL;
+    diE2_Car_10    : BOOL;
+    
+    // ------------------------------------------------------------------------
+    // SAFETY SENSORS — Elevator 1
+    // ------------------------------------------------------------------------
+    diE1_DoorSensor      : BOOL;    // TRUE = something blocking door
+    diE1_WeightSensor    : BOOL;    // TRUE = overload detected
+    diE1_EmergencyBtn    : BOOL;    // TRUE = emergency stop pressed
+    diE1_Overspeed       : BOOL;    // TRUE = moving too fast
+    diE1_DoorFault       : BOOL;    // TRUE = door mechanism broken
+    
+    // ------------------------------------------------------------------------
+    // SAFETY SENSORS — Elevator 2
+    // ------------------------------------------------------------------------
+    diE2_DoorSensor      : BOOL;
+    diE2_WeightSensor    : BOOL;
+    diE2_EmergencyBtn    : BOOL;
+    diE2_Overspeed       : BOOL;
+    diE2_DoorFault       : BOOL;
+    
+    // ------------------------------------------------------------------------
+    // BUILDING SAFETY
+    // ------------------------------------------------------------------------
+    diFireAlarm          : BOOL;    // Building fire alarm system
+    diFirefighterKey     : BOOL;    // Firefighter override switch
+    diPowerFault         : BOOL;    // TRUE = power supply problem
+    
+    // ------------------------------------------------------------------------
+    // OUTPUTS — Elevator 1 Motor & Door Control
+    // ------------------------------------------------------------------------
+    doE1_MotorUp        AT %QX0.0 : BOOL;    // Drive motor up
+    doE1_MotorDown      AT %QX0.1 : BOOL;    // Drive motor down
+    doE1_MotorStop      AT %QX0.2 : BOOL;    // Brake / stop motor
+    
+    doE1_DoorOpen       AT %QX0.3 : BOOL;    // Open doors
+    doE1_DoorClose      AT %QX0.4 : BOOL;    // Close doors
+    
+    // ------------------------------------------------------------------------
+    // OUTPUTS — Elevator 1 Floor Indicators (LEDs in the cab)
+    // ------------------------------------------------------------------------
+    doE1_FloorInd_G     AT %QX1.0 : BOOL;
+    doE1_FloorInd_1     AT %QX1.1 : BOOL;
+    doE1_FloorInd_2     AT %QX1.2 : BOOL;
+    doE1_FloorInd_3     AT %QX1.3 : BOOL;
+    doE1_FloorInd_4     AT %QX1.4 : BOOL;
+    doE1_FloorInd_5     AT %QX1.5 : BOOL;
+    doE1_FloorInd_6     AT %QX1.6 : BOOL;
+    doE1_FloorInd_7     AT %QX1.7 : BOOL;
+    doE1_FloorInd_8     AT %QX2.0 : BOOL;
+    doE1_FloorInd_9     AT %QX2.1 : BOOL;
+    doE1_FloorInd_10    AT %QX2.2 : BOOL;
+    
+    // Elevator 1 direction arrows
+    doE1_DirUp          AT %QX2.3 : BOOL;
+    doE1_DirDown        AT %QX2.4 : BOOL;
+    
+    // ------------------------------------------------------------------------
+    // OUTPUTS — Elevator 2 Motor & Door Control
+    // ------------------------------------------------------------------------
+    doE2_MotorUp        AT %QX3.0 : BOOL;
+    doE2_MotorDown      AT %QX3.1 : BOOL;
+    doE2_MotorStop      AT %QX3.2 : BOOL;
+    
+    doE2_DoorOpen       AT %QX3.3 : BOOL;
+    doE2_DoorClose      AT %QX3.4 : BOOL;
+    
+    // ------------------------------------------------------------------------
+    // OUTPUTS — Elevator 2 Floor Indicators
+    // ------------------------------------------------------------------------
+    doE2_FloorInd_G     AT %QX4.0 : BOOL;
+    doE2_FloorInd_1     AT %QX4.1 : BOOL;
+    doE2_FloorInd_2     AT %QX4.2 : BOOL;
+    doE2_FloorInd_3     AT %QX4.3 : BOOL;
+    doE2_FloorInd_4     AT %QX4.4 : BOOL;
+    doE2_FloorInd_5     AT %QX4.5 : BOOL;
+    doE2_FloorInd_6     AT %QX4.6 : BOOL;
+    doE2_FloorInd_7     AT %QX4.7 : BOOL;
+    doE2_FloorInd_8     AT %QX5.0 : BOOL;
+    doE2_FloorInd_9     AT %QX5.1 : BOOL;
+    doE2_FloorInd_10    AT %QX5.2 : BOOL;
+    
+    // Elevator 2 direction arrows
+    doE2_DirUp          AT %QX5.3 : BOOL;
+    doE2_DirDown        AT %QX5.4 : BOOL;
+    
+    // ------------------------------------------------------------------------
+    // OUTPUTS — Hall Button LEDs (feedback that call is registered)
+    // ------------------------------------------------------------------------
+    doHall_G_Up_LED     AT %QX6.0 : BOOL;
+    doHall_1_Up_LED     AT %QX6.1 : BOOL;
+    doHall_1_Down_LED   AT %QX6.2 : BOOL;
+    doHall_2_Up_LED     AT %QX6.3 : BOOL;
+    doHall_2_Down_LED   AT %QX6.4 : BOOL;
+    doHall_3_Up_LED     AT %QX6.5 : BOOL;
+    doHall_3_Down_LED   AT %QX6.6 : BOOL;
+    doHall_4_Up_LED     AT %QX6.7 : BOOL;
+    doHall_4_Down_LED   AT %QX7.0 : BOOL;
+    doHall_5_Up_LED     AT %QX7.1 : BOOL;
+    doHall_5_Down_LED   AT %QX7.2 : BOOL;
+    doHall_6_Up_LED     AT %QX7.3 : BOOL;
+    doHall_6_Down_LED   AT %QX7.4 : BOOL;
+    doHall_7_Up_LED     AT %QX7.5 : BOOL;
+    doHall_7_Down_LED   AT %QX7.6 : BOOL;
+    doHall_8_Up_LED     AT %QX7.7 : BOOL;
+    doHall_8_Down_LED   AT %QX8.0 : BOOL;
+    doHall_9_Up_LED     AT %QX8.1 : BOOL;
+    doHall_9_Down_LED   AT %QX8.2 : BOOL;
+    doHall_10_Down_LED  AT %QX8.3 : BOOL;
+    
+    // ------------------------------------------------------------------------
+    // SYSTEM STATUS OUTPUTS
+    // ------------------------------------------------------------------------
+    doSystemAlarm       AT %QX9.0 : BOOL;    // TRUE = any alarm active
+    doSystemReady       AT %QX9.1 : BOOL;    // TRUE = system operational
+    
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <DUT Name="E_ElevatorState" Id="{8e3b1132-4935-4521-8670-6406286d0272}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE E_ElevatorState :
+(
+	eIdle           := 0,   // Waiting for calls, doors closed
+    eMovingUp       := 1,   // Traveling upward
+    eMovingDown     := 2,   // Traveling downward
+    eDoorsOpening   := 3,   // Door opening animation
+    eDoorsOpen      := 4,   // Doors fully open, waiting for passengers
+    eDoorsClosing   := 5,   // Door closing animation
+    eEmergencyStop  := 6,   // Emergency stop button pressed
+    eFireMode       := 7,   // Fire alarm — returning to ground
+    eOverload       := 8,   // Too much weight detected
+    eMaintenance    := 9    // Service mode (future feature)
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

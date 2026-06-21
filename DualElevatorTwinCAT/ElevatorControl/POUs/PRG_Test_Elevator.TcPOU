@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="PRG_Test_Elevator" Id="{b455894b-f7a1-4dee-a65e-07b35a47f9d6}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PRG_Test_Elevator
+VAR
+    // Instance under test
+    fbElev  : FB_Elevator;
+    
+    // Test control
+    nStep       : INT := 0;
+    bDone       : BOOL := FALSE;
+    bPassed     : BOOL := FALSE;
+    
+    // Step timer
+    tonWait     : TON;
+    
+    // Call tracking
+    bCalledFloor3   : BOOL := FALSE;
+    bCalledFloor1   : BOOL := FALSE;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// ============================================
+// ELEVATOR UNIT TEST — Automatic Sequence
+// ============================================
+
+IF bDone THEN
+    RETURN; // Test finished, keep results visible
+END_IF;
+
+CASE nStep OF
+
+// --------------------------------------------
+// STEP 0: Verify initial state
+// --------------------------------------------
+0:
+    IF fbElev.eState = E_ElevatorState.eIdle AND 
+       fbElev.iCurrentFloor = 0 AND
+       fbElev.fDoorOpenPercent = 0.0 THEN
+        nStep := 1;
+    END_IF;
+
+// --------------------------------------------
+// STEP 1: Call elevator to floor 3
+// --------------------------------------------
+1:
+    fbElev.bEnable := TRUE;
+    IF NOT bCalledFloor3 THEN
+        fbElev.CallFloor(3);
+        bCalledFloor3 := TRUE;
+    END_IF;
+    
+    // Should start moving up
+    IF fbElev.eState = E_ElevatorState.eMovingUp THEN
+        nStep := 2;
+    END_IF;
+
+// --------------------------------------------
+// STEP 2: Wait until doors open at floor 3
+// --------------------------------------------
+2:
+    IF fbElev.iCurrentFloor = 3 AND 
+       fbElev.eState = E_ElevatorState.eDoorsOpen AND
+       fbElev.fDoorOpenPercent >= 99.0 THEN
+        nStep := 3;
+        tonWait(IN := FALSE); // Reset timer
+    END_IF;
+
+// --------------------------------------------
+// STEP 3: Wait for doors to close, return to idle
+// --------------------------------------------
+3:
+    tonWait(IN := TRUE, PT := T#5S); // Give time for full cycle
+    
+    IF fbElev.eState = E_ElevatorState.eIdle AND tonWait.Q THEN
+        nStep := 4;
+        bCalledFloor1 := FALSE;
+    END_IF;
+
+// --------------------------------------------
+// STEP 4: Call floor 1 (going down)
+// --------------------------------------------
+4:
+    IF NOT bCalledFloor1 THEN
+        fbElev.CallFloor(1);
+        bCalledFloor1 := TRUE;
+    END_IF;
+    
+    IF fbElev.eState = E_ElevatorState.eMovingDown THEN
+        nStep := 5;
+    END_IF;
+
+// --------------------------------------------
+// STEP 5: Arrive at floor 1, verify complete
+// --------------------------------------------
+5:
+    IF fbElev.iCurrentFloor = 1 AND 
+       fbElev.eState = E_ElevatorState.eIdle THEN
+        bPassed := TRUE;
+        bDone := TRUE;
+    END_IF;
+
+END_CASE;
+
+// Call the function block every scan
+//fbElev();]]></ST>
+    </Implementation>
+    <LineIds Name="PRG_Test_Elevator">
+      <LineId Id="22" Count="82" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
