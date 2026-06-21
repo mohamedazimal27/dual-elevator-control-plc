@@ -1,0 +1,110 @@
+<div id="Desktop"
+     data-tchmi-type="TcHmi.Controls.System.TcHmiView"
+     data-tchmi-top="0"
+     data-tchmi-left="0"
+     data-tchmi-width-mode="Content"
+     data-tchmi-min-width="100"
+     data-tchmi-min-width-unit="%"
+     data-tchmi-height-mode="Content"
+     data-tchmi-min-height="100"
+     data-tchmi-min-height-unit="%">
+
+    <!-- Beckhoff Logo -->
+    <div id="ViewDesktopBeckhoffLogo"
+         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiImage"
+         data-tchmi-src="Images/Beckhoff_Logo.svg"
+         data-tchmi-left="20"
+         data-tchmi-top="20"
+         data-tchmi-width="194"
+         data-tchmi-height="57">
+    </div>
+
+    <!-- Dashboard Title -->
+    <div id="TxtTitle"
+         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock"
+         data-tchmi-left="300"
+         data-tchmi-top="30"
+         data-tchmi-width="600"
+         data-tchmi-height="40"
+         data-tchmi-text="DUAL ELEVATOR CONTROL SYSTEM">
+    </div>
+
+    <!-- System Status Label -->
+    <div id="LblSystemStatus"
+         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock"
+         data-tchmi-left="50"
+         data-tchmi-top="120"
+         data-tchmi-width="150"
+         data-tchmi-height="30"
+         data-tchmi-text="System Status">
+    </div>
+
+    <!-- System Status Value -->
+    <div id="TxtSystemStatus"
+         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox"
+         data-tchmi-left="220"
+         data-tchmi-top="120"
+         data-tchmi-width="300"
+         data-tchmi-height="30"
+         data-tchmi-text="%s%PLC1.GVL_HMI.g_sSystemStatus%/s%">
+    </div>
+
+    <!-- Alarm Label -->
+    <div id="LblAlarm"
+         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock"
+         data-tchmi-left="50"
+         data-tchmi-top="170"
+         data-tchmi-width="150"
+         data-tchmi-height="30"
+         data-tchmi-text="Alarm Message">
+    </div>
+
+    <!-- Alarm Message -->
+    <div id="TxtAlarmMessage"
+         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox"
+         data-tchmi-left="220"
+         data-tchmi-top="170"
+         data-tchmi-width="500"
+         data-tchmi-height="30"
+         data-tchmi-text="%s%PLC1.GVL_HMI.g_sAlarmMessage%/s%">
+    </div>
+
+    <!-- Elevator 1 Region -->
+    <div id="E1Region"
+         data-tchmi-type="TcHmi.Controls.System.TcHmiRegion"
+         data-tchmi-left="100"
+         data-tchmi-top="260"
+         data-tchmi-width="350"
+         data-tchmi-height="700">
+    </div>
+
+    <!-- Elevator 1 Title -->
+    <div id="E1Title"
+         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock"
+         data-tchmi-left="200"
+         data-tchmi-top="220"
+         data-tchmi-width="150"
+         data-tchmi-height="30"
+         data-tchmi-text="ELEVATOR 1">
+    </div>
+
+    <!-- Elevator 2 Region -->
+    <div id="E2Region"
+         data-tchmi-type="TcHmi.Controls.System.TcHmiRegion"
+         data-tchmi-left="650"
+         data-tchmi-top="260"
+         data-tchmi-width="350"
+         data-tchmi-height="700">
+    </div>
+
+    <!-- Elevator 2 Title -->
+    <div id="E2Title"
+         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock"
+         data-tchmi-left="750"
+         data-tchmi-top="220"
+         data-tchmi-width="150"
+         data-tchmi-height="30"
+         data-tchmi-text="ELEVATOR 2">
+    </div>
+
+</div>

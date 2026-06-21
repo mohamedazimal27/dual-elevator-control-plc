@@ -6,11 +6,14 @@
 				<Task Id="3" Priority="20" CycleTime="100000" AmsPort="350" AdtTasks="true">
 					<Name>PlcTask</Name>
 				</Task>
+				<Task Id="4" Priority="21" CycleTime="100000" AmsPort="351" AdtTasks="true">
+					<Name>PlcTask1</Name>
+				</Task>
 			</Tasks>
 		</System>
 		<Plc>
 			<Project GUID="{F22E1ECD-0141-4999-B299-497CAAA1A6A4}" Name="ElevatorControl" PrjFilePath="ElevatorControl\ElevatorControl.plcproj" TmcFilePath="ElevatorControl\ElevatorControl.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="ElevatorControl\ElevatorControl.tmc" TmcHash="{750DC53C-2791-D639-1543-DC846C73B930}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="ElevatorControl\ElevatorControl.tmc" TmcHash="{D35AD293-7163-B833-3D53-9740CFED09BF}">
 					<Name>ElevatorControl Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="2" AreaNo="1">
