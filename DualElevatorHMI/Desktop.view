@@ -1,110 +1,521 @@
 <div id="Desktop"
      data-tchmi-type="TcHmi.Controls.System.TcHmiView"
      data-tchmi-top="0"
+     data-tchmi-top-unit="px"
      data-tchmi-left="0"
-     data-tchmi-width-mode="Content"
-     data-tchmi-min-width="100"
-     data-tchmi-min-width-unit="%"
-     data-tchmi-height-mode="Content"
-     data-tchmi-min-height="100"
-     data-tchmi-min-height-unit="%">
+     data-tchmi-left-unit="px"
+     data-tchmi-width="1280"
+     data-tchmi-width-unit="px"
+     data-tchmi-height="800"
+     data-tchmi-height-unit="px">
 
+    <!-- ============================================ -->
+    <!-- HEADER BACKGROUND (Rectangle, not Region)    -->
+    <!-- ============================================ -->
     <!-- Beckhoff Logo -->
-    <div id="ViewDesktopBeckhoffLogo"
-         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiImage"
-         data-tchmi-src="Images/Beckhoff_Logo.svg"
-         data-tchmi-left="20"
-         data-tchmi-top="20"
-         data-tchmi-width="194"
-         data-tchmi-height="57">
-    </div>
-
-    <!-- Dashboard Title -->
-    <div id="TxtTitle"
-         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock"
-         data-tchmi-left="300"
-         data-tchmi-top="30"
-         data-tchmi-width="600"
-         data-tchmi-height="40"
-         data-tchmi-text="DUAL ELEVATOR CONTROL SYSTEM">
-    </div>
-
+    <!-- Title -->
+    <!-- Date Display -->
+    <!-- Time Display -->
+    <!-- ============================================ -->
+    <!-- STATUS ROW BACKGROUND (Rectangle)            -->
+    <!-- ============================================ -->
     <!-- System Status Label -->
-    <div id="LblSystemStatus"
-         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock"
-         data-tchmi-left="50"
-         data-tchmi-top="120"
-         data-tchmi-width="150"
-         data-tchmi-height="30"
-         data-tchmi-text="System Status">
-    </div>
-
     <!-- System Status Value -->
-    <div id="TxtSystemStatus"
-         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox"
-         data-tchmi-left="220"
-         data-tchmi-top="120"
-         data-tchmi-width="300"
-         data-tchmi-height="30"
-         data-tchmi-text="%s%PLC1.GVL_HMI.g_sSystemStatus%/s%">
-    </div>
+    <!-- Alarm Message Label -->
+    <!-- Alarm Message Value -->
+    <!-- System Ready Label -->
+    <!-- System Ready Indicator (Green Light) -->
+    <!-- Alarm Active Label -->
+    <!-- Alarm Active Indicator (Red Light) -->
+    <!-- Traffic Mode Panel Background -->
+    <!-- Traffic Mode Label -->
+    <!-- Traffic Mode Value -->
 
-    <!-- Alarm Label -->
-    <div id="LblAlarm"
-         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock"
-         data-tchmi-left="50"
-         data-tchmi-top="170"
-         data-tchmi-width="150"
-         data-tchmi-height="30"
-         data-tchmi-text="Alarm Message">
-    </div>
+    <script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+        {
+        "left": 0,
+        "right": 0,
+        "top": 2,
+        "bottom": 2,
+        "leftUnit": "px",
+        "rightUnit": "px",
+        "topUnit": "px",
+        "bottomUnit": "px"
+        }
+    </script>
 
-    <!-- Alarm Message -->
-    <div id="TxtAlarmMessage"
-         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox"
-         data-tchmi-left="220"
-         data-tchmi-top="170"
-         data-tchmi-width="500"
-         data-tchmi-height="30"
-         data-tchmi-text="%s%PLC1.GVL_HMI.g_sAlarmMessage%/s%">
-    </div>
+    <script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+        {
+        "left": "None",
+        "right": "None",
+        "top": "Solid",
+        "bottom": "Solid"
+        }
+    </script>
+    <div id="TcHmiRegion" data-tchmi-type="TcHmi.Controls.System.TcHmiRegion" data-tchmi-height="100" data-tchmi-height-unit="px" data-tchmi-left="0" data-tchmi-left-unit="%" data-tchmi-top="90" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%">
 
-    <!-- Elevator 1 Region -->
-    <div id="E1Region"
+        <script data-tchmi-target-attribute="data-tchmi-border-color" type="application/json">
+            {
+            "color": "rgba(128, 128, 128, 1)"
+            }
+        </script>
+
+        <script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+            {
+            "left": "Solid",
+            "right": "Solid",
+            "top": "Solid",
+            "bottom": "Solid"
+            }
+        </script>
+
+        <script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+            {
+            "left": 1,
+            "right": 1,
+            "top": 1,
+            "bottom": 1,
+            "leftUnit": "px",
+            "rightUnit": "px",
+            "topUnit": "px",
+            "bottomUnit": "px"
+            }
+        </script>
+    </div>
+    <div id="TcHmi_Controls_Beckhoff_TcHmiImage" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiImage" data-tchmi-height="65" data-tchmi-height-unit="px" data-tchmi-left="4" data-tchmi-left-unit="px" data-tchmi-src="Images/Beckhoff_Logo.svg" data-tchmi-top="15" data-tchmi-top-unit="px" data-tchmi-width="219" data-tchmi-width-unit="px">
+    </div>
+    <div id="TcHmiRegion_1" data-tchmi-type="TcHmi.Controls.System.TcHmiRegion" data-tchmi-height="50" data-tchmi-height-unit="px" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-top="748" data-tchmi-top-unit="px" data-tchmi-width="100" data-tchmi-width-unit="%">
+
+        <script data-tchmi-target-attribute="data-tchmi-border-color" type="application/json">
+            {
+            "color": "rgba(128, 128, 128, 1)"
+            }
+        </script>
+
+        <script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+            {
+            "left": 0,
+            "right": 0,
+            "top": 1,
+            "bottom": 1,
+            "leftUnit": "px",
+            "rightUnit": "px",
+            "topUnit": "px",
+            "bottomUnit": "px"
+            }
+        </script>
+
+        <script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+            {
+            "left": "None",
+            "right": "None",
+            "top": "Solid",
+            "bottom": "Solid"
+            }
+        </script>
+    </div>
+    <div id="TcHmiRegion_2" data-tchmi-type="TcHmi.Controls.System.TcHmiRegion" data-tchmi-height="559" data-tchmi-height-unit="px" data-tchmi-left="0" data-tchmi-left-unit="px" data-tchmi-top="189" data-tchmi-top-unit="px" data-tchmi-width="50" data-tchmi-width-unit="%">
+
+        <script data-tchmi-target-attribute="data-tchmi-border-color" type="application/json">
+            {
+            "color": "rgba(128, 128, 128, 1)"
+            }
+        </script>
+
+        <script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+            {
+            "left": 0,
+            "right": 1,
+            "top": 0,
+            "bottom": 0,
+            "leftUnit": "px",
+            "rightUnit": "px",
+            "topUnit": "px",
+            "bottomUnit": "px"
+            }
+        </script>
+
+        <script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+            {
+            "left": "None",
+            "right": "Solid",
+            "top": "None",
+            "bottom": "None"
+            }
+        </script>
+    </div>
+    <div id="TcHmiTextblock" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="25" data-tchmi-height-unit="px" data-tchmi-left="392" data-tchmi-left-unit="px" data-tchmi-text="DUAL ELEVATOR SYSTEM CONTROL" data-tchmi-top="33" data-tchmi-top-unit="px" data-tchmi-width="438" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-font-size="30">
+    </div>
+    <div id="TxtLblSystemStatus" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="25" data-tchmi-height-unit="px" data-tchmi-left="40" data-tchmi-left-unit="px" data-tchmi-text="System Status" data-tchmi-top="100" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-font-size="150" data-tchmi-text-font-size-unit="%">
+    </div>
+    <div id="TxtLblAlarm" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="40" data-tchmi-left-unit="px" data-tchmi-text="Alarm Status" data-tchmi-top="143" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-horizontal-alignment="Left" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="150">
+    </div>
+    <div id="TxtSystemStatus" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="25" data-tchmi-height-unit="px" data-tchmi-left="200" data-tchmi-left-unit="px" data-tchmi-text="%s%PLC1.GVL_HMI.g_sSystemStatus%/s%" data-tchmi-top="100" data-tchmi-top-unit="px" data-tchmi-width="300" data-tchmi-width-unit="px">
+        <script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+            {
+            "top": 3,
+            "right": 3,
+            "bottom": 3,
+            "left": 3
+            }
+        </script>
+
+    </div>
+    <div id="TxtAlarmMessage" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="25" data-tchmi-height-unit="px" data-tchmi-left="200" data-tchmi-left-unit="px" data-tchmi-text="%s%PLC1.MAIN.Safety::sAlarmMessage%/s%" data-tchmi-top="140" data-tchmi-top-unit="px" data-tchmi-width="300" data-tchmi-width-unit="px">
+        <script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+            {
+            "top": 3,
+            "right": 3,
+            "bottom": 3,
+            "left": 3
+            }
+        </script>
+
+    </div>
+    <div id="LedSystemReady" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiEllipse" data-tchmi-height="20" data-tchmi-height-unit="px" data-tchmi-left="860" data-tchmi-left-unit="px" data-tchmi-top="105" data-tchmi-top-unit="px" data-tchmi-width="20" data-tchmi-width-unit="px">
+    </div>
+    <div id="LedAlarm" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiEllipse" data-tchmi-height="20" data-tchmi-height-unit="px" data-tchmi-left="860" data-tchmi-left-unit="px" data-tchmi-top="143" data-tchmi-top-unit="px" data-tchmi-width="20" data-tchmi-width-unit="px">
+    </div>
+    <div id="LblSystemReady" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="639" data-tchmi-left-unit="px" data-tchmi-text="System Ready" data-tchmi-top="100" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-background-image-horizontal-alignment="Left" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="150">
+    </div>
+    <div id="LblSystemReady_1" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="639" data-tchmi-left-unit="px" data-tchmi-text="Aalrm Status" data-tchmi-top="140" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-background-image-horizontal-alignment="Left" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="150">
+    </div>
+    <div id="LblTrafficMode" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="1016" data-tchmi-left-unit="px" data-tchmi-text="Traffic Mode" data-tchmi-top="100" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-background-image-horizontal-alignment="Left" data-tchmi-text-font-size-unit="%" data-tchmi-text-font-size="150" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center">
+
+
+    </div>
+    <div id="txtTrafficMode" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextbox" data-tchmi-height="26" data-tchmi-height-unit="px" data-tchmi-left="1016" data-tchmi-left-unit="px" data-tchmi-text="%s%PLC1.GVL_HMI.g_eHMI_TrafficMode%/s%" data-tchmi-top="140" data-tchmi-top-unit="px" data-tchmi-width="150" data-tchmi-width-unit="px" data-tchmi-text-horizontal-alignment="Center">
+        <script data-tchmi-target-attribute="data-tchmi-content-padding" type="application/json">
+            {
+            "top": 3,
+            "right": 3,
+            "bottom": 3,
+            "left": 3
+            }
+        </script>
+
+
+        <script data-tchmi-target-attribute="data-tchmi-border-color" type="application/json">
+            {
+            "color": "None"
+            }
+        </script>
+
+        <script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+            {
+            "color": "None"
+            }
+        </script>
+    </div>
+    <div id="lblElevator1" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="25" data-tchmi-height-unit="px" data-tchmi-left="100" data-tchmi-left-unit="px" data-tchmi-text="ELEVATOR 1" data-tchmi-top="189" data-tchmi-top-unit="px" data-tchmi-width="400" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-font-size="30">
+
+        <script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+            {
+            "color": "rgba(0, 0, 0, 1)"
+            }
+        </script>
+
+        <script data-tchmi-target-attribute="data-tchmi-text-color" type="application/json">
+            {
+            "color": "rgba(255, 255, 255, 1)"
+            }
+        </script>
+    </div>
+    <div id="lblElevator2" data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock" data-tchmi-height="25" data-tchmi-height-unit="px" data-tchmi-left="756" data-tchmi-left-unit="px" data-tchmi-text="ELEVATOR 2" data-tchmi-top="189" data-tchmi-top-unit="px" data-tchmi-width="400" data-tchmi-width-unit="px" data-tchmi-word-wrap="true" data-tchmi-text-horizontal-alignment="Center" data-tchmi-text-vertical-alignment="Center" data-tchmi-text-font-size="30">
+        <script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+            {
+            "color": "rgba(0, 0, 0, 1)"
+            }
+        </script>
+
+        <script data-tchmi-target-attribute="data-tchmi-text-color" type="application/json">
+            {
+            "color": "rgba(255, 255, 255, 1)"
+            }
+        </script>
+    </div>
+    <div id="region_e1_groundfloor" data-tchmi-type="TcHmi.Controls.System.TcHmiRegion" data-tchmi-height="29" data-tchmi-height-unit="px" data-tchmi-left="283" data-tchmi-left-unit="px" data-tchmi-top="661" data-tchmi-top-unit="px" data-tchmi-width="55" data-tchmi-width-unit="px">
+
+        <script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+            {
+            "color": "None"
+            }
+        </script>
+
+        <script data-tchmi-target-attribute="data-tchmi-border-color" type="application/json">
+            {
+            "color": "rgba(0, 0, 0, 1)"
+            }
+        </script>
+
+        <script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+            {
+            "left": 1,
+            "right": 1,
+            "top": 1,
+            "bottom": 1,
+            "leftUnit": "px",
+            "rightUnit": "px",
+            "topUnit": "px",
+            "bottomUnit": "px"
+            }
+        </script>
+
+        <script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+            {
+            "left": "Solid",
+            "right": "Solid",
+            "top": "Solid",
+            "bottom": "Solid"
+            }
+        </script>
+    </div>
+    <!-- ====================================================== -->
+    <!-- ELEVATOR 1 FLOOR REGIONS (Animation Grid)              -->
+    <!-- ====================================================== -->
+
+    <div id="region_e1_floor1"
          data-tchmi-type="TcHmi.Controls.System.TcHmiRegion"
-         data-tchmi-left="100"
-         data-tchmi-top="260"
-         data-tchmi-width="350"
-         data-tchmi-height="700">
+         data-tchmi-left="   "
+         data-tchmi-left-unit="  "
+         data-tchmi-top="&quot;
+"
+         data-tchmi-top-unit="
+"
+         data-tchmi-width="it"
+         data-tchmi-width-unit="h="
+         data-tchmi-height="id"
+         data-tchmi-height-unit="i-">
+        <script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+            {"color":"None"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-color" type="application/json">
+            {"color":"rgba(0,0,0,1)"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+            {"left":1,"right":1,"top":1,"bottom":1,"leftUnit":"px","rightUnit":"px","topUnit":"px","bottomUnit":"px"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+            {"left":"Solid","right":"Solid","top":"Solid","bottom":"Solid"}
+        </script>
     </div>
 
-    <!-- Elevator 1 Title -->
-    <div id="E1Title"
-         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock"
-         data-tchmi-left="200"
-         data-tchmi-top="220"
-         data-tchmi-width="150"
-         data-tchmi-height="30"
-         data-tchmi-text="ELEVATOR 1">
-    </div>
-
-    <!-- Elevator 2 Region -->
-    <div id="E2Region"
+    <div id="region_e1_floor2"
          data-tchmi-type="TcHmi.Controls.System.TcHmiRegion"
-         data-tchmi-left="650"
-         data-tchmi-top="260"
-         data-tchmi-width="350"
-         data-tchmi-height="700">
+         data-tchmi-left="id&quot;"
+         data-tchmi-left-unit="sc"
+         data-tchmi-top=" <d"
+         data-tchmi-top-unit="  "
+         data-tchmi-width=".C"
+         data-tchmi-width-unit="  "
+         data-tchmi-height="
+ "
+         data-tchmi-height-unit="&quot;">
+        <script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+            {"color":"None"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-color" type="application/json">
+            {"color":"rgba(0,0,0,1)"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+            {"left":1,"right":1,"top":1,"bottom":1,"leftUnit":"px","rightUnit":"px","topUnit":"px","bottomUnit":"px"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+            {"left":"Solid","right":"Solid","top":"Solid","bottom":"Solid"}
+        </script>
     </div>
 
-    <!-- Elevator 2 Title -->
-    <div id="E2Title"
-         data-tchmi-type="TcHmi.Controls.Beckhoff.TcHmiTextblock"
-         data-tchmi-left="750"
-         data-tchmi-top="220"
-         data-tchmi-width="150"
-         data-tchmi-height="30"
-         data-tchmi-text="ELEVATOR 2">
+    <div id="region_e1_floor3"
+         data-tchmi-type="TcHmi.Controls.System.TcHmiRegion"
+         data-tchmi-left="}
+"
+         data-tchmi-left-unit="ri"
+         data-tchmi-top="rib"
+         data-tchmi-top-unit=" t"
+         data-tchmi-width="  "
+         data-tchmi-width-unit="&quot;:"
+         data-tchmi-height="om"
+         data-tchmi-height-unit="  ">
+        <script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+            {"color":"None"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-color" type="application/json">
+            {"color":"rgba(0,0,0,1)"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+            {"left":1,"right":1,"top":1,"bottom":1,"leftUnit":"px","rightUnit":"px","topUnit":"px","bottomUnit":"px"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+            {"left":"Solid","right":"Solid","top":"Solid","bottom":"Solid"}
+        </script>
     </div>
 
+    <div id="region_e1_floor4"
+         data-tchmi-type="TcHmi.Controls.System.TcHmiRegion"
+         data-tchmi-left="ute"
+         data-tchmi-left-unit="e="
+         data-tchmi-top="   "
+         data-tchmi-top-unit="p&quot;"
+         data-tchmi-width="px"
+         data-tchmi-width-unit="x&quot;"
+         data-tchmi-height="  "
+         data-tchmi-height-unit="tc">
+        <script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+            {"color":"None"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-color" type="application/json">
+            {"color":"rgba(0,0,0,1)"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+            {"left":1,"right":1,"top":1,"bottom":1,"leftUnit":"px","rightUnit":"px","topUnit":"px","bottomUnit":"px"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+            {"left":"Solid","right":"Solid","top":"Solid","bottom":"Solid"}
+        </script>
+    </div>
+
+    <div id="region_e1_floor5"
+         data-tchmi-type="TcHmi.Controls.System.TcHmiRegion"
+         data-tchmi-left="chm"
+         data-tchmi-left-unit="-b"
+         data-tchmi-top="cat"
+         data-tchmi-top-unit="or"
+         data-tchmi-width="  "
+         data-tchmi-width-unit="-t"
+         data-tchmi-height="-t"
+         data-tchmi-height-unit="ti">
+        <script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+            {"color":"None"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-color" type="application/json">
+            {"color":"rgba(0,0,0,1)"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+            {"left":1,"right":1,"top":1,"bottom":1,"leftUnit":"px","rightUnit":"px","topUnit":"px","bottomUnit":"px"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+            {"left":"Solid","right":"Solid","top":"Solid","bottom":"Solid"}
+        </script>
+    </div>
+
+    <div id="region_e1_floor6"
+         data-tchmi-type="TcHmi.Controls.System.TcHmiRegion"
+         data-tchmi-left="
+  "
+         data-tchmi-left-unit="t-"
+         data-tchmi-top="ckg"
+         data-tchmi-top-unit="n/"
+         data-tchmi-width="r&quot;"
+         data-tchmi-width-unit="  "
+         data-tchmi-height="et"
+         data-tchmi-height-unit="lo">
+        <script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+            {"color":"None"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-color" type="application/json">
+            {"color":"rgba(0,0,0,1)"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+            {"left":1,"right":1,"top":1,"bottom":1,"leftUnit":"px","rightUnit":"px","topUnit":"px","bottomUnit":"px"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+            {"left":"Solid","right":"Solid","top":"Solid","bottom":"Solid"}
+        </script>
+    </div>
+
+    <div id="region_e1_floor7"
+         data-tchmi-type="TcHmi.Controls.System.TcHmiRegion"
+         data-tchmi-left="   "
+         data-tchmi-left-unit="  "
+         data-tchmi-top="55&quot;"
+         data-tchmi-top-unit="ni"
+         data-tchmi-width="i-"
+         data-tchmi-width-unit="i-"
+         data-tchmi-height="<s"
+         data-tchmi-height-unit="e=">
+        <script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+            {"color":"None"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-color" type="application/json">
+            {"color":"rgba(0,0,0,1)"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+            {"left":1,"right":1,"top":1,"bottom":1,"leftUnit":"px","rightUnit":"px","topUnit":"px","bottomUnit":"px"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+            {"left":"Solid","right":"Solid","top":"Solid","bottom":"Solid"}
+        </script>
+    </div>
+
+    <div id="region_e1_floor8"
+         data-tchmi-type="TcHmi.Controls.System.TcHmiRegion"
+         data-tchmi-left="loo"
+         data-tchmi-left-unit="&quot;T"
+         data-tchmi-top="miR"
+         data-tchmi-top-unit="ef"
+         data-tchmi-width="mi"
+         data-tchmi-width-unit="tc"
+         data-tchmi-height="a-"
+         data-tchmi-height-unit="ta">
+        <script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+            {"color":"None"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-color" type="application/json">
+            {"color":"rgba(0,0,0,1)"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+            {"left":1,"right":1,"top":1,"bottom":1,"leftUnit":"px","rightUnit":"px","topUnit":"px","bottomUnit":"px"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+            {"left":"Solid","right":"Solid","top":"Solid","bottom":"Solid"}
+        </script>
+    </div>
+
+    <div id="region_e1_floor9"
+         data-tchmi-type="TcHmi.Controls.System.TcHmiRegion"
+         data-tchmi-left="rde"
+         data-tchmi-left-unit="n&quot;"
+         data-tchmi-top="Sol"
+         data-tchmi-top-unit="li"
+         data-tchmi-width="  "
+         data-tchmi-width-unit="<d"
+         data-tchmi-height="  "
+         data-tchmi-height-unit="tr">
+        <script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+            {"color":"None"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-color" type="application/json">
+            {"color":"rgba(0,0,0,1)"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+            {"left":1,"right":1,"top":1,"bottom":1,"leftUnit":"px","rightUnit":"px","topUnit":"px","bottomUnit":"px"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+            {"left":"Solid","right":"Solid","top":"Solid","bottom":"Solid"}
+        </script>
+    </div>
+
+    <div id="region_e1_floor10"
+         data-tchmi-type="TcHmi.Controls.System.TcHmiRegion"
+         data-tchmi-left="ght"
+         data-tchmi-left-unit="it"
+         data-tchmi-top="&quot;to"
+         data-tchmi-top-unit="}"
+         data-tchmi-width="  "
+         data-tchmi-width-unit="bu"
+         data-tchmi-height="&quot; "
+         data-tchmi-height-unit="  ">
+        <script data-tchmi-target-attribute="data-tchmi-background-color" type="application/json">
+            {"color":"None"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-color" type="application/json">
+            {"color":"rgba(0,0,0,1)"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-width" type="application/json">
+            {"left":1,"right":1,"top":1,"bottom":1,"leftUnit":"px","rightUnit":"px","topUnit":"px","bottomUnit":"px"}
+        </script>
+        <script data-tchmi-target-attribute="data-tchmi-border-style" type="application/json">
+            {"left":"Solid","right":"Solid","top":"Solid","bottom":"Solid"}
+        </script>
+    </div>
 </div>

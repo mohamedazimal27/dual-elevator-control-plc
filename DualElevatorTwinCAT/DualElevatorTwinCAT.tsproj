@@ -13,7 +13,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{F22E1ECD-0141-4999-B299-497CAAA1A6A4}" Name="ElevatorControl" PrjFilePath="ElevatorControl\ElevatorControl.plcproj" TmcFilePath="ElevatorControl\ElevatorControl.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="ElevatorControl\ElevatorControl.tmc" TmcHash="{D35AD293-7163-B833-3D53-9740CFED09BF}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="ElevatorControl\ElevatorControl.tmc" TmcHash="{CED0556E-8466-8939-78CF-FE17575E7FD1}">
 					<Name>ElevatorControl Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="2" AreaNo="1">
